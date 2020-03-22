@@ -1,0 +1,23 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Citizen clone app",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MichaelEvtushenko/js-course.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MichaelEvtushenko/js-course/issues"
+  },
+  "homepage": "https://github.com/MichaelEvtushenko/js-course#readme",
+  "dependencies": {
+    "koa": "^2.11.0"
+  }
+}
