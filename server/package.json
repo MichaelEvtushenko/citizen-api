@@ -18,6 +18,14 @@
   },
   "homepage": "https://github.com/MichaelEvtushenko/js-course#readme",
   "dependencies": {
-    "koa": "^2.11.0"
+    "bcrypt": "^4.0.1",
+    "cryptojs": "^2.5.3",
+    "knex": "^0.20.12",
+    "koa": "^2.11.0",
+    "koa-bodyparser": "^4.2.1",
+    "koa-router": "^8.0.8",
+    "nodemailer": "^6.4.6",
+    "pg": "^7.18.2",
+    "uuid": "^7.0.2"
   }
 }
