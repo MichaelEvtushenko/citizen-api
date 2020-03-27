@@ -19,7 +19,7 @@ const register = async ({email, password, fullName}) => {
     const [entity] = await userService.createUser({email, password, fullName});
     const [authLink] = await createAuthLinkFor(entity);
     console.log('auth link saved', authLink);
-    emailHelper.sendEmail(email, 'test sub', authLink+'!..');
+    await emailHelper.sendEmail(email, 'test sub', authLink+'!..');
 };
 
 const authenticate = async ({email, password}) => {

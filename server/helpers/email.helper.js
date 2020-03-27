@@ -1,10 +1,7 @@
 const nodeMailer = require('nodemailer');
 
-
 const createTransporter = async () => {
-    const {user, pass} = await nodeMailer.createTestAccount();
-
-    return nodeMailer.createTransport({ // copy-paste template
+    return nodeMailer.createTransport({
         service: 'gmail',
         auth: {
             user: process.env.EMAIL_USER,
@@ -13,24 +10,13 @@ const createTransporter = async () => {
     });
 };
 
-
-
 const sendEmail = async (to, subject, text) => {
-    const emailOptions = {};
     const transporter = await createTransporter();
-    // TODO: refactor
-    // emailOptions.from =`'awawd wa' <>`;
-    emailOptions.to = to;
-    emailOptions.subject = subject;
-    emailOptions.text = text;
-
-    transporter.sendMail(emailOptions, (err, info) => {
+    transporter.sendMail({to, subject, text}, (err, info) => {
         if (err) {
             throw err;
         }
-        console.log(info);
-        // log...
-        // console.log('message is sen')
+        console.log(`Activation message was sent to: <${info.accepted}>. Response: ${info.response.split(' ')[2]}.`);
     });
 };
 
