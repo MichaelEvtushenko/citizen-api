@@ -8,18 +8,22 @@ const emailHelper = require('../../helpers/email.helper');
 const securityConfig = require('../../config/security.config');
 const authLinkQuery = require('../../data/queries/auth-link.query');
 
-// TODO: fix score_case
-const createAuthLinkFor = ({user_id}) => {
+const createAuthLinkFor = ({userId}) => {
     const exp = Date.now() + securityConfig.authLinkExpiresIn;
-    return authLinkQuery.insert({exp, user_id, linkId: uuid.v4()});
+    return authLinkQuery.insert({exp, userId, linkId: uuid.v4()});
 };
 
 // TODO: make it transactional
 const register = async ({email, password, fullName}) => {
-    const [entity] = await userService.createUser({email, password, fullName});
-    const [authLink] = await createAuthLinkFor(entity);
-    console.log('auth link saved', authLink);
-    await emailHelper.sendEmail(email, 'test sub', authLink+'!..');
+    const [user] = await userService.createUser({email, password, fullName});
+    const [authLink] = await createAuthLinkFor(user);
+    await emailHelper.sendEmail(email, 'test sub', authLink + '!..');
+};
+
+const activateLink = async linkId => {
+    const [{user_id: userId}] = await authLinkQuery.findByLinkId(linkId);
+    await authLinkQuery.update({link_id: linkId, used: true});
+    await userQuery.update({userId, enabled: true});
 };
 
 const authenticate = async ({email, password}) => {
@@ -38,4 +42,5 @@ const authenticate = async ({email, password}) => {
 module.exports = {
     register,
     authenticate,
+    activateLink,
 };

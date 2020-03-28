@@ -1,15 +1,23 @@
 const knex = require('../db/connection');
+const mapper = require('../../helpers/query.helper')(rowMapper);
+
+function rowMapper (entity) {
+    const {user_id: userId, full_name: fullName, created_at: createdAt, ...rest} = entity;
+    return {userId, fullName, createdAt, ...rest};
+}
 
 const getById = id => {
     return knex('users')
         .select('*')
-        .where('user_id', id);
+        .where('user_id', id)
+        .then(mapper);
 };
 
 const findByEmail = email => {
     return knex('users')
         .select('*')
-        .where({email});
+        .where({email})
+        .then(mapper);
 };
 
 const create = user => {
@@ -20,7 +28,8 @@ const create = user => {
             'full_name': user.fullName,
             'created_at': new Date().toISOString()
         })
-        .returning('*');
+        .returning('*')
+        .then(mapper);
 };
 
 const update = ({userId, ...rest}) => {
@@ -29,10 +38,10 @@ const update = ({userId, ...rest}) => {
             'user_id': userId
         })
         .update({...rest})
-        .returning('*');
+        .returning('*')
+        .then(mapper);
 
 };
-
 
 module.exports = {
     getById,

@@ -1,31 +1,47 @@
 const knex = require('../db/connection');
+const mapper = require('../../helpers/query.helper')(rowMapper);
 
-// TODO: fix score_case
-const insert = ({user_id, exp, linkId}) => {
-    console.log(user_id)
+function rowMapper(entity) {
+    const {link_id: linkId, user_id: userId, ...rest} = entity;
+    return {linkId, userId, ...rest};
+}
+
+const insert = ({userId, exp, linkId}) => {
     return knex('auth_links')
         .insert({
             'link_id': linkId,
-            'user_id': user_id,
+            'user_id': userId,
             'exp': exp,
         })
-        .returning('*');
+        .returning('*')
+        .then(mapper);
+
 };
 
-const update = ({link_id, ...rest}) => {
+// TODO: fix ...rest
+const update = ({linkId, ...rest}) => {
     return knex('auth_links')
         .update({
             ...rest
         })
-        .where({link_id})
-        .returning('*');
+        .where({link_id: linkId})
+        .returning('*')
+        .then(mapper);
 };
 
-const findByLinkId = (linkId) => {
+const findByLinkId = linkId => {
     return knex('auth_links')
         .select('*')
         .where({
-            'link_id': linkId
+            'link_id': linkId,
+        });
+};
+
+const activateLink = linkId => {
+    knex('auth_links')
+        .update({used: true})
+        .where({
+            link_id: linkId,
         });
 };
 
@@ -33,6 +49,7 @@ module.exports = {
     insert,
     update,
     findByLinkId,
+    activateLink,
 };
 
 
