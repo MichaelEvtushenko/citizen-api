@@ -9,7 +9,7 @@ module.exports = (roles) => {
         const token = authorization.split(' ')[1];
         const payload = jwtHelper.verifyToken(token);
 
-        ctx.assert(payload.exp >= Date.now(), 401, 'Token expired');
+        ctx.assert(payload.exp > Date.now(), 401, 'Token expired');
         ctx.assert(roles.includes(payload.role), 403, 'You have no permission');
 
         const {email} = payload;

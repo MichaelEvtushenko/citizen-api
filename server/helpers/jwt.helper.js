@@ -6,7 +6,7 @@ const encodeToBase64 = data => Buffer.from(JSON.stringify(data)).toString('base6
 const decodeBase64 = data => JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
 
 const generateToken = ({email}) => {
-    const header = { // hard-coded stuff
+    const header = {
         alg: 'HS256',
         typ: 'jwt'
     };
@@ -27,9 +27,11 @@ const generateToken = ({email}) => {
 };
 
 const extractClaims = token => {
-    const encodedPayload = token.split('.')[1];
-    if (encodedPayload) {
-        return decodeBase64(encodedPayload);
+    if (token) {
+        const encodedPayload = token.split('.')[1];
+        if (encodedPayload) {
+            return decodeBase64(encodedPayload);
+        }
     }
     return null;
 };
@@ -49,7 +51,6 @@ const verifyToken = token => {
     }
     return extractClaims(token);
 };
-
 
 module.exports = {
     verifyToken,

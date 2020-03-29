@@ -34,11 +34,12 @@ const findByLinkId = linkId => {
         .select('*')
         .where({
             'link_id': linkId,
-        });
+        })
+        .then(mapper);
 };
 
-const activateLink = linkId => {
-    knex('auth_links')
+const activateLink = async linkId => {
+    await knex('auth_links')
         .update({used: true})
         .where({
             link_id: linkId,

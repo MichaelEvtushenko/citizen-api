@@ -23,6 +23,7 @@
     "knex": "^0.20.12",
     "koa": "^2.11.0",
     "koa-bodyparser": "^4.2.1",
+    "koa-logger": "^3.2.1",
     "koa-router": "^8.0.8",
     "nodemailer": "^6.4.6",
     "pg": "^7.18.2",

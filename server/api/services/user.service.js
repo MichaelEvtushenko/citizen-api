@@ -1,6 +1,5 @@
 const bcrypt = require('bcrypt');
 
-// const emailHelper = require('../../helpers/email.helper');
 const userQuery = require('../../data/queries/user.query');
 const securityConfig = require('../../config/security.config');
 

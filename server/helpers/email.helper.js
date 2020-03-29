@@ -20,8 +20,15 @@ const sendEmail = async (to, subject, text) => {
     });
 };
 
+const sendActivationCode = async ({email, linkId, fullName}) => {
+    // TODO: fix hard-coded url
+    const activationUrl = 'http://localhost:3000/api/auth/activate';
+    const emailBody = `Hi, ${fullName}.\nPlease activate your account: ${activationUrl}/${linkId}.`;
+    await sendEmail(email, 'Activation code', emailBody);
+};
+
 module.exports = {
-    sendEmail,
+    sendActivationCode,
 };
 
 
