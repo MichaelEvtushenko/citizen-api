@@ -6,6 +6,8 @@ const jwtHelper = require('../../helpers/jwt.helper');
 const emailHelper = require('../../helpers/email.helper');
 const {throwInCase} = require('../../helpers/validation.helper');
 const securityConfig = require('../../config/security.config');
+const jwtConfig = require('../../config/jwt.config');
+const sessionQuery = require('../../data/queries/session.query');
 const userQuery = require('../../data/queries/user.query');
 const authLinkQuery = require('../../data/queries/auth-link.query');
 
@@ -32,20 +34,51 @@ const activateLink = async linkId => {
     await userQuery.enableUser(userId);
 };
 
-const authenticate = async ({email, password}) => {
+const authenticate = async ({email, password, userAgent}) => {
     const [fromDb] = await userQuery.findByEmail(email);
     if (!fromDb) {
         throw {status: 400, message: 'Email is wrong'};
     }
-    const {password: hash} = fromDb;
+    const {password: hash, userId} = fromDb;
     if (!await bcrypt.compare(password, hash)) {
         throw {status: 400, message: 'Password is wrong'};
     }
-    return jwtHelper.generateToken({email});
+    const {refreshToken} = await createSession({userAgent, userId});
+    return {
+        accessToken: jwtHelper.generateToken(userId),
+        refreshToken
+    };
+};
+
+const createSession = async ({userId, userAgent}) => {
+    const expiredAt = Date.now() + jwtConfig.refreshTokenExpiresIn;
+    const refreshToken = uuid.v4();
+    await sessionQuery.insert({userId, userAgent, refreshToken, expiredAt});
+    return {refreshToken};
+};
+
+const refreshToken = async ({refreshToken, userAgent}) => {
+    const [fromDb] = await sessionQuery.findByRefreshToken(refreshToken);
+    throwInCase(!fromDb, {message: 'Refresh token does not exist', status: 404});
+    throwInCase(fromDb.expiredAt < Date.now(), {message: 'Refresh token expired', status: 401});
+    // Attempt to hack
+    // TODO: ignore browser version
+    if (fromDb.userAgent !== userAgent) {
+        console.warn('Attempt to authorize from unknown user-agent:', userAgent);
+        // await sessionQuery.deleteByUserId(fromDb.userId);
+        throw {message: 'Unauthorized', status: 401};
+    }
+    const newRefreshToken = uuid.v4();
+    await sessionQuery.updateRefreshToken({refreshToken, newRefreshToken});
+    return {
+        accessToken: jwtHelper.generateToken(fromDb.userId),
+        refreshToken: newRefreshToken
+    };
 };
 
 module.exports = {
     register,
     authenticate,
     activateLink,
+    refreshToken,
 };

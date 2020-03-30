@@ -1,6 +1,6 @@
 const Router = require('koa-router');
 
-const registerValidation = require('../middlewares/validation/register.middleware');
+const registerMiddleware = require('../middlewares/validation/register.middleware');
 const signInMiddleware = require('../middlewares/validation/sign-in.middleware');
 const authService = require('../services/auth.service');
 const router = new Router({prefix: '/auth'});
@@ -12,13 +12,20 @@ router.get('/activate/:linkId', async ctx => {
 });
 
 router.post('/login', signInMiddleware, async ctx => {
-    ctx.body = await authService.authenticate(ctx.state.credentials);
-    ctx.status = 200;
+    const {email, password} = ctx.state.credentials;
+    const userAgent = ctx.userAgent._agent.source;
+    ctx.body = await authService.authenticate({email, password, userAgent});
 });
 
-router.post('/register', registerValidation, async ctx => {
+router.post('/register', registerMiddleware, async ctx => {
     ctx.body = await authService.register(ctx.state.user);
     ctx.status = 204;
+});
+
+router.get('/refresh/:token', async ctx => {
+    const refreshToken = ctx.params.token;
+    const userAgent = ctx.userAgent._agent.source;
+    ctx.body = await authService.refreshToken({refreshToken, userAgent});
 });
 
 module.exports = router;

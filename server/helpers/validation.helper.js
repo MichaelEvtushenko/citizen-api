@@ -5,10 +5,9 @@ const isEmailValid = email => email && emailRegexp.test(email);
 
 const isPasswordValid = password => password && password.length >= minPasswordLength;
 
-const throwInCase = (result, exception) => {
-    if (result && exception) {
-        throw exception;
-    }
+const throwInCase = (result, ex) => {
+    if (result && ex)
+        throw ex;
 };
 
 module.exports = {

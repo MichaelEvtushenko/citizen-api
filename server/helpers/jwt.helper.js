@@ -5,15 +5,16 @@ const jwtConfig = require('../config/jwt.config');
 const encodeToBase64 = data => Buffer.from(JSON.stringify(data)).toString('base64');
 const decodeBase64 = data => JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
 
-const generateToken = ({email}) => {
+// TODO: remove unused params
+const generateToken = (userId) => {
     const header = {
         alg: 'HS256',
         typ: 'jwt'
     };
 
     const payload = {
-        email,
-        exp: Date.now() + jwtConfig.expiresIn,
+        sub: userId,
+        exp: Date.now() + jwtConfig.accessTokenExpiresIn,
         // some other stuff: roles, etc...
     };
 
