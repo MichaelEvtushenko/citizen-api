@@ -29,8 +29,10 @@ router.get('/logout/:refreshToken', protectedRoute(), async ctx => {
     ctx.status = 204;
 });
 
-router.get('/recover-password', async ctx => {
-
+router.get('/logout-all', protectedRoute(), async ctx => {
+    const {userId} = ctx.state;
+    await authService.logoutAll(userId);
+    ctx.status = 204;
 });
 
 router.get('/refresh/:token', async ctx => {

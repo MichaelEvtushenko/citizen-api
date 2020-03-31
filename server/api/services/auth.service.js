@@ -53,6 +53,8 @@ const authenticate = async ({email, password, userAgent}) => {
 
 const logout = async refreshToken => await sessionQuery.deleteByRefreshToken(refreshToken);
 
+const logoutAll = async userId => await sessionQuery.deleteByUserId(userId);
+
 const createRefreshToken = async ({userId, userAgent}) => {
     const expiredAt = Date.now() + jwtConfig.refreshTokenExpiresIn;
     const refreshToken = uuid.v4();
@@ -70,7 +72,7 @@ const refreshToken = async ({refreshToken, userAgent}) => {
     // Attempt to hack
     if (fromDb.userAgent !== userAgent) {
         console.warn('Attempt to authorize from unknown user-agent:', userAgent);
-        // await sessionQuery.deleteByUserId(fromDb.userId);
+        await sessionQuery.deleteByUserId(fromDb.userId);
         throw {message: 'Unauthorized', status: 401};
     }
     const newRefreshToken = uuid.v4();
@@ -87,4 +89,5 @@ module.exports = {
     activateLink,
     refreshToken,
     logout,
+    logoutAll,
 };
