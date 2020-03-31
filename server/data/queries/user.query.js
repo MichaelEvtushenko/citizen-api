@@ -49,10 +49,18 @@ const enableUser = async userId => {
         .update({enabled: true});
 };
 
+const findByUserId = userId => {
+    return knex('users')
+        .where({user_id: userId})
+        .select('*')
+        .then(mapper);
+};
+
 module.exports = {
     getById,
     create,
     findByEmail,
     update,
     enableUser,
+    findByUserId,
 };

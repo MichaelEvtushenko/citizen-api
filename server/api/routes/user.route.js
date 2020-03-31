@@ -9,6 +9,10 @@ router.get('/test', protectedRoute(),async ctx => {
     ctx.body = 'ok';
 });
 
+router.get('/admin', protectedRoute(['admin']),async ctx => {
+    ctx.body = 'Hello, admin!';
+});
+
 router.get('/:userId', async ctx => {
     const userId = +ctx.params.userId;
     ctx.assert(userId, 400, 'User id must be a number');

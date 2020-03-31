@@ -6,7 +6,7 @@ const encodeToBase64 = data => Buffer.from(JSON.stringify(data)).toString('base6
 const decodeBase64 = data => JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
 
 // TODO: remove unused params
-const generateToken = (userId) => {
+const generateToken = ({userId, role}) => {
     const header = {
         alg: 'HS256',
         typ: 'jwt'
@@ -15,7 +15,7 @@ const generateToken = (userId) => {
     const payload = {
         sub: userId,
         exp: Date.now() + jwtConfig.accessTokenExpiresIn,
-        // some other stuff: roles, etc...
+        role
     };
 
     const encodedHeader = encodeToBase64(header);

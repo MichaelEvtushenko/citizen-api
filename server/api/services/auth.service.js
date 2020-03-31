@@ -39,18 +39,19 @@ const authenticate = async ({email, password, userAgent}) => {
     if (!fromDb) {
         throw {status: 400, message: 'Email is wrong'};
     }
-    const {password: hash, userId} = fromDb;
+    const {password: hash, userId, role, enabled} = fromDb;
+    throwInCase(!enabled, {message: 'Non-activated account', status: 400});
     if (!await bcrypt.compare(password, hash)) {
         throw {status: 400, message: 'Password is wrong'};
     }
-    const {refreshToken} = await createSession({userAgent, userId});
+    const {refreshToken} = await createRefreshToken({userAgent, userId});
     return {
-        accessToken: jwtHelper.generateToken(userId),
+        accessToken: jwtHelper.generateToken({userId, role}),
         refreshToken
     };
 };
 
-const createSession = async ({userId, userAgent}) => {
+const createRefreshToken = async ({userId, userAgent}) => {
     const expiredAt = Date.now() + jwtConfig.refreshTokenExpiresIn;
     const refreshToken = uuid.v4();
     await sessionQuery.insert({userId, userAgent, refreshToken, expiredAt});
@@ -60,9 +61,11 @@ const createSession = async ({userId, userAgent}) => {
 const refreshToken = async ({refreshToken, userAgent}) => {
     const [fromDb] = await sessionQuery.findByRefreshToken(refreshToken);
     throwInCase(!fromDb, {message: 'Refresh token does not exist', status: 404});
-    throwInCase(fromDb.expiredAt < Date.now(), {message: 'Refresh token expired', status: 401});
+    const {userId, role, expiredAt} = fromDb;
+    if (expiredAt < Date.now()) {
+        throw {message: 'Refresh token expired', status: 401};
+    }
     // Attempt to hack
-    // TODO: ignore browser version
     if (fromDb.userAgent !== userAgent) {
         console.warn('Attempt to authorize from unknown user-agent:', userAgent);
         // await sessionQuery.deleteByUserId(fromDb.userId);
@@ -71,7 +74,7 @@ const refreshToken = async ({refreshToken, userAgent}) => {
     const newRefreshToken = uuid.v4();
     await sessionQuery.updateRefreshToken({refreshToken, newRefreshToken});
     return {
-        accessToken: jwtHelper.generateToken(fromDb.userId),
+        accessToken: jwtHelper.generateToken({userId, role}),
         refreshToken: newRefreshToken
     };
 };

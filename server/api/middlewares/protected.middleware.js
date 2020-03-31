@@ -1,20 +1,15 @@
 const jwtHelper = require('../../helpers/jwt.helper');
-const userQuery = require('../../data/queries/user.query');
 
-module.exports = (roles) => {
+module.exports = (roles = []) => {
     return async (ctx, next) => {
         const {authorization} = ctx.headers;
         ctx.assert(authorization, 401, 'Authorization header missed');
 
         const token = authorization.split(' ')[1];
-        const payload = jwtHelper.verifyToken(token);
+        const {exp, role} = jwtHelper.verifyToken(token);
 
-        ctx.assert(payload.exp > Date.now(), 401, 'Token expired');
-        // ctx.assert(roles.includes(payload.role), 403, 'You have no permission');
-
-        const {email} = payload;
-        const entity = await userQuery.findByEmail(email);
-        ctx.assert(entity.enabled, 401, 'Non-activated account');
+        ctx.assert(exp > Date.now(), 401, 'Token expired');
+        ctx.assert(roles.length ? roles.includes(role) : 1, 403, 'You have no permission');
 
         return next();
     }
