@@ -5,11 +5,11 @@ const protectedRoute = require('../middlewares/protected.middleware');
 
 const router = new Router({prefix: '/user'});
 
-router.get('/test', protectedRoute(),async ctx => {
+router.get('/test', protectedRoute(), async ctx => {
     ctx.body = 'ok';
 });
 
-router.get('/admin', protectedRoute(['admin']),async ctx => {
+router.get('/admin', protectedRoute(['admin']), async ctx => {
     ctx.body = 'Hello, admin!';
 });
 

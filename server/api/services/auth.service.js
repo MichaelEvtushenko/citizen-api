@@ -11,7 +11,7 @@ const sessionQuery = require('../../data/queries/session.query');
 const userQuery = require('../../data/queries/user.query');
 const authLinkQuery = require('../../data/queries/auth-link.query');
 
-const createAuthLinkFor = ({userId}) => {
+const createAuthLink = ({userId}) => {
     const exp = Date.now() + securityConfig.authLinkExpiresIn;
     return authLinkQuery.insert({exp, userId, linkId: uuid.v4()});
 };
@@ -19,7 +19,7 @@ const createAuthLinkFor = ({userId}) => {
 // TODO: make it transactional
 const register = async ({email, password, fullName}) => {
     const [user] = await userService.createUser({email, password, fullName});
-    const [{linkId}] = await createAuthLinkFor(user);
+    const [{linkId}] = await createAuthLink(user);
     await emailHelper.sendActivationCode({email, fullName, linkId});
 };
 
@@ -50,6 +50,8 @@ const authenticate = async ({email, password, userAgent}) => {
         refreshToken
     };
 };
+
+const logout = async refreshToken => await sessionQuery.deleteByRefreshToken(refreshToken);
 
 const createRefreshToken = async ({userId, userAgent}) => {
     const expiredAt = Date.now() + jwtConfig.refreshTokenExpiresIn;
@@ -84,4 +86,5 @@ module.exports = {
     authenticate,
     activateLink,
     refreshToken,
+    logout,
 };

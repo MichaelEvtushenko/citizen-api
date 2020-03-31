@@ -35,9 +35,16 @@ const updateRefreshToken = async ({refreshToken, newRefreshToken}) => {
         .update({refresh_token: newRefreshToken});
 };
 
+const deleteByRefreshToken = async (refreshToken) => {
+    await knex('sessions')
+        .where({refresh_token: refreshToken})
+        .del();
+};
+
 module.exports = {
     insert,
     findByRefreshToken,
     deleteByUserId,
     updateRefreshToken,
+    deleteByRefreshToken,
 };

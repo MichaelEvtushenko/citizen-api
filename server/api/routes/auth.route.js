@@ -2,6 +2,7 @@ const Router = require('koa-router');
 
 const registerMiddleware = require('../middlewares/validation/register.middleware');
 const signInMiddleware = require('../middlewares/validation/sign-in.middleware');
+const protectedRoute = require('../middlewares/protected.middleware');
 const authService = require('../services/auth.service');
 const router = new Router({prefix: '/auth'});
 
@@ -20,6 +21,16 @@ router.post('/login', signInMiddleware, async ctx => {
 router.post('/register', registerMiddleware, async ctx => {
     ctx.body = await authService.register(ctx.state.user);
     ctx.status = 204;
+});
+
+router.get('/logout/:refreshToken', protectedRoute(), async ctx => {
+    const refreshToken = ctx.params.refreshToken;
+    await authService.logout(refreshToken);
+    ctx.status = 204;
+});
+
+router.get('/recover-password', async ctx => {
+
 });
 
 router.get('/refresh/:token', async ctx => {
