@@ -23,7 +23,7 @@ router.post('/register', registerMiddleware, async ctx => {
     ctx.status = 204;
 });
 
-router.get('/logout/:refreshToken', protectedRoute(), async ctx => {
+router.get('/logout/:refreshToken', async ctx => {
     const refreshToken = ctx.params.refreshToken;
     await authService.logout(refreshToken);
     ctx.status = 204;

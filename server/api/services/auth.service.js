@@ -4,7 +4,7 @@ const uuid = require('uuid');
 const userService = require('./user.service');
 const jwtHelper = require('../../helpers/jwt.helper');
 const emailHelper = require('../../helpers/email.helper');
-const {throwInCase} = require('../../helpers/validation.helper');
+const {throwInCase, isUuidValid} = require('../../helpers/validation.helper');
 const securityConfig = require('../../config/security.config');
 const jwtConfig = require('../../config/jwt.config');
 const sessionQuery = require('../../data/queries/session.query');
@@ -51,7 +51,10 @@ const authenticate = async ({email, password, userAgent}) => {
     };
 };
 
-const logout = async refreshToken => await sessionQuery.deleteByRefreshToken(refreshToken);
+const logout = async refreshToken => {
+    throwInCase(!isUuidValid(refreshToken), {message: 'Refresh token is not valid', status: 400});
+    await sessionQuery.deleteByRefreshToken(refreshToken);
+};
 
 const logoutAll = async userId => await sessionQuery.deleteByUserId(userId);
 
@@ -63,6 +66,7 @@ const createRefreshToken = async ({userId, userAgent}) => {
 };
 
 const refreshToken = async ({refreshToken, userAgent}) => {
+    throwInCase(!isUuidValid(refreshToken), {message: 'Refresh token is not valid', status: 400});
     const [fromDb] = await sessionQuery.joinUserByRefreshToken(refreshToken);
     throwInCase(!fromDb, {message: 'Refresh token does not exist', status: 404});
     const {userId, expiredAt, role} = fromDb;
