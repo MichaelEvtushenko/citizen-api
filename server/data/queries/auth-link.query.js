@@ -1,10 +1,5 @@
 const knex = require('../db/connection');
-const mapper = require('../../helpers/query.helper')(rowMapper);
-
-function rowMapper(entity) {
-    const {link_id: linkId, user_id: userId, ...rest} = entity;
-    return {linkId, userId, ...rest};
-}
+const {authLinkMapper} = require('../../helpers/query.helper');
 
 const insert = ({userId, exp, linkId}) => {
     return knex('auth_links')
@@ -14,7 +9,7 @@ const insert = ({userId, exp, linkId}) => {
             'exp': exp,
         })
         .returning('*')
-        .then(mapper);
+        .then(authLinkMapper);
 
 };
 
@@ -26,7 +21,7 @@ const update = ({linkId, ...rest}) => {
         })
         .where({link_id: linkId})
         .returning('*')
-        .then(mapper);
+        .then(authLinkMapper);
 };
 
 const findByLinkId = linkId => {
@@ -35,7 +30,7 @@ const findByLinkId = linkId => {
         .where({
             'link_id': linkId,
         })
-        .then(mapper);
+        .then(authLinkMapper);
 };
 
 const activateLink = async linkId => {

@@ -63,16 +63,17 @@ const createRefreshToken = async ({userId, userAgent}) => {
 };
 
 const refreshToken = async ({refreshToken, userAgent}) => {
-    const [fromDb] = await sessionQuery.findByRefreshToken(refreshToken);
+    const [fromDb] = await sessionQuery.joinUserByRefreshToken(refreshToken);
     throwInCase(!fromDb, {message: 'Refresh token does not exist', status: 404});
-    const {userId, role, expiredAt} = fromDb;
+    const {userId, expiredAt, role} = fromDb;
     if (expiredAt < Date.now()) {
         throw {message: 'Refresh token expired', status: 401};
     }
     // Attempt to hack
     if (fromDb.userAgent !== userAgent) {
         console.warn('Attempt to authorize from unknown user-agent:', userAgent);
-        await sessionQuery.deleteByUserId(fromDb.userId);
+        console.warn('User-agent from db:', fromdb.userAgent);
+        // await sessionQuery.deleteByUserId(fromDb.userId);
         throw {message: 'Unauthorized', status: 401};
     }
     const newRefreshToken = uuid.v4();

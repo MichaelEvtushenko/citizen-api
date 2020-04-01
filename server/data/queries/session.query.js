@@ -1,10 +1,5 @@
 const knex = require('../db/connection');
-const mapper = require('../../helpers/query.helper')(rowMapper);
-
-function rowMapper(entity) {
-    const {refresh_token: refreshToken, user_id: userId, user_agent: userAgent, expired_at: expiredAt} = entity;
-    return {refreshToken, userId, userAgent, expiredAt};
-}
+const {sessionMapper, userMapper} = require('../../helpers/query.helper');
 
 const insert = async ({refreshToken, userId, expiredAt, userAgent}) => {
     await knex('sessions')
@@ -20,7 +15,7 @@ const findByRefreshToken = (refreshToken) => {
     return knex('sessions')
         .where({refresh_token: refreshToken})
         .select('*')
-        .then(mapper);
+        .then(sessionMapper);
 };
 
 const deleteByUserId = async (userId) => {
@@ -41,10 +36,20 @@ const deleteByRefreshToken = async (refreshToken) => {
         .del();
 };
 
+const joinUserByRefreshToken = (refreshToken) => {
+    return knex('sessions')
+        .where({'sessions.refresh_token': refreshToken})
+        .join('users', 'users.user_id', 'sessions.user_id')
+        .select('*')
+        .then(sessionMapper)
+        .then(userMapper);
+};
+
 module.exports = {
     insert,
     findByRefreshToken,
     deleteByUserId,
     updateRefreshToken,
     deleteByRefreshToken,
+    joinUserByRefreshToken,
 };

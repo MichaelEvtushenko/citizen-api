@@ -1,23 +1,19 @@
 const knex = require('../db/connection');
-const mapper = require('../../helpers/query.helper')(rowMapper);
+const {userMapper} = require('../../helpers/query.helper');
 
-function rowMapper(entity) {
-    const {user_id: userId, full_name: fullName, created_at: createdAt, ...rest} = entity;
-    return {userId, fullName, createdAt, ...rest};
-}
-
+// TODO: fix method name
 const getById = id => {
     return knex('users')
         .select('*')
         .where('user_id', id)
-        .then(mapper);
+        .then(userMapper);
 };
 
 const findByEmail = email => {
     return knex('users')
         .select('*')
         .where({email})
-        .then(mapper);
+        .then(userMapper);
 };
 
 const create = user => {
@@ -29,7 +25,7 @@ const create = user => {
             'created_at': new Date().toISOString()
         })
         .returning('*')
-        .then(mapper);
+        .then(userMapper);
 };
 
 // @Deprecated
@@ -40,7 +36,7 @@ const update = ({userId, ...rest}) => {
         })
         .update({...rest})
         .returning('*')
-        .then(mapper);
+        .then(userMapper);
 };
 
 const enableUser = async userId => {
@@ -53,7 +49,7 @@ const findByUserId = userId => {
     return knex('users')
         .where({user_id: userId})
         .select('*')
-        .then(mapper);
+        .then(userMapper);
 };
 
 module.exports = {

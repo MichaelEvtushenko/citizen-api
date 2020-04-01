@@ -5,7 +5,6 @@ const jwtConfig = require('../config/jwt.config');
 const encodeToBase64 = data => Buffer.from(JSON.stringify(data)).toString('base64');
 const decodeBase64 = data => JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
 
-// TODO: remove unused params
 const generateToken = ({userId, role}) => {
     const header = {
         alg: 'HS256',
