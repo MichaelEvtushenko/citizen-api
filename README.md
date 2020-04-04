@@ -18,9 +18,9 @@ _Idea came from Citizen app: https://en.wikipedia.org/wiki/Citizen_(app) that do
 * Bootstrap or material ui
 #### Back-end (new other technologies will be added in the future updates):
 * Koa
-* Docker (docker hub as CI)
+* Docker
 * PostgreSQL
-
+* AWS
 ### Data flow
 
 ![](./readme_static/data-flow.png)
