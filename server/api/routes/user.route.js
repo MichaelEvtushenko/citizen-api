@@ -5,7 +5,7 @@ const protectedRoute = require('../middlewares/protected.middleware');
 
 const router = new Router({prefix: '/user'});
 
-router.get('/test', protectedRoute(), async ctx => {
+router.get('/http', protectedRoute(), async ctx => {
     ctx.body = 'ok';
 });
 

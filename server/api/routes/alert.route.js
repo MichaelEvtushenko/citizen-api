@@ -13,7 +13,6 @@ router.post('/', alertValidation, async ctx => {
     ctx.status = 204;
 });
 
-// POST $HOST/api/alert/approval/42?approve=false|true
 // TODO: set protectedRoute()
 router.post('/approval/:alertId', async ctx => {
     const userId = ctx.state.userId || 88;
@@ -24,7 +23,6 @@ router.post('/approval/:alertId', async ctx => {
 });
 
 // TODO: ?? set protectedRoute() ??
-// GET $HOST/api/alert?lng=23.42132147&lat=42.2132312252&radius=20&unit=m&limit=10
 router.get('/', async ctx => {
     const {lat: latitude, lng: longitude, radius, unit, limit} = ctx.query;
     const {alerts, ...rest} = alertService.findAlertsInRadius({latitude, longitude, radius, unit, limit});

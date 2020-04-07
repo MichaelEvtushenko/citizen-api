@@ -14,8 +14,18 @@ const throwInCase = (result, ex) => {
         throw ex;
 };
 
+const trowInCaseLambda = (result, lambda) => {
+    if (result && lambda) {
+        const ex = lambda();
+        if (ex) {
+            throw ex;
+        }
+    }
+};
+
 module.exports = {
     throwInCase,
+    trowInCaseLambda,
     isPasswordValid,
     isEmailValid,
     isUuidValid,

@@ -1,7 +1,7 @@
 const alertQuery = require('../../data/queries/alert.query');
 const approvalQuery = require('../../data/queries/approval.query');
 const {convertToMetres} = require('../../helpers/unit.helper');
-const {throwInCase} = require('../../helpers/validation.helper');
+const {throwInCase, trowInCaseLambda} = require('../../helpers/validation.helper');
 
 const alertRadius = 30;
 
@@ -13,11 +13,11 @@ const createAlert = async ({userId, description, latitude, longitude}) => {
 const approveAlert = async ({userId, alertId, approve}) => {
     const [alertFromDb] = await alertQuery.findByAlertId(alertId);
     throwInCase(!alertFromDb, {message: 'Not found', status: 404});
-    const [approvalFromDb] = await approvalQuery.findByUserId(userId);
-    throwInCase(approvalFromDb, {
+    const [approvalFromDb] = await approvalQuery.findByAlertIdAndUserId({userId, alertId});
+    trowInCaseLambda(approvalFromDb, () => ({
         message: {message: 'Approval already created', approve: approvalFromDb.approve},
         status: 400
-    });
+    }));
     approve = approve === 'true';
     await approvalQuery.insert({userId, alertId, approve});
 };
