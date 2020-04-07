@@ -6,12 +6,13 @@ const isEmailValid = email => email && emailRegexp.test(email);
 
 const isPasswordValid = password => password && password.length >= minPasswordLength;
 
+const isUuidValid = uuid => uuid && uuid.length === 36 && uuidRegexp.test(uuid);
+
+// TODO: use assert instead
 const throwInCase = (result, ex) => {
     if (result && ex)
         throw ex;
 };
-
-const isUuidValid = uuid => uuid && uuid.length === 36 && uuidRegexp.test(uuid);
 
 module.exports = {
     throwInCase,

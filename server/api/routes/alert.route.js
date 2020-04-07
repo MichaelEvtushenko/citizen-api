@@ -1,0 +1,37 @@
+const Router = require('koa-router');
+
+const protectedRoute = require('../middlewares/protected.middleware');
+const alertValidation = require('../middlewares/validation/alert.middleware');
+const alertService = require('../services/alert.service');
+
+const router = new Router({prefix: '/alert'});
+
+// TODO: set protectedRoute()
+router.post('/', alertValidation, async ctx => {
+    const userId = ctx.state.userId || 88;
+    await alertService.createAlert({...ctx.state.alert, userId});
+    ctx.status = 204;
+});
+
+// POST $HOST/api/alert/approval/42?approve=false|true
+// TODO: set protectedRoute()
+router.post('/approval/:alertId', async ctx => {
+    const userId = ctx.state.userId || 88;
+    const alertId = ctx.params.alertId;
+    const approve = ctx.query['approve'];
+    await alertService.approveAlert({userId, alertId, approve});
+    ctx.status = 204;
+});
+
+// TODO: ?? set protectedRoute() ??
+// GET $HOST/api/alert?lng=23.42132147&lat=42.2132312252&radius=20&unit=m&limit=10
+router.get('/', async ctx => {
+    const {lat: latitude, lng: longitude, radius, unit, limit} = ctx.query;
+    const {alerts, ...rest} = alertService.findAlertsInRadius({latitude, longitude, radius, unit, limit});
+    ctx.body = {
+        alerts: await alerts,
+        ...rest
+    };
+});
+
+module.exports = router;

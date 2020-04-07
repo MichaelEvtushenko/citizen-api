@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/MichaelEvtushenko/js-course#readme",
   "dependencies": {
+    "aws-sdk": "^2.653.0",
     "bcrypt": "^4.0.1",
     "cryptojs": "^2.5.3",
     "knex": "^0.20.12",
