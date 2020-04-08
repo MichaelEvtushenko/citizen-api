@@ -8,7 +8,12 @@ const isPasswordValid = password => password && password.length >= minPasswordLe
 
 const isUuidValid = uuid => uuid && uuid.length === 36 && uuidRegexp.test(uuid);
 
-// TODO: use assert instead
+const isLongitudeValid = longitude => longitude && Math.abs(longitude) <= 180;
+
+const isLatitudeValid = latitude => latitude && Math.abs(latitude) <= 90;
+
+const isLocationValid = () => ({latitude, longitude}) => isLatitudeValid(latitude) && isLongitudeValid(longitude);
+
 const throwInCase = (result, ex) => {
     if (result && ex)
         throw ex;
@@ -29,4 +34,7 @@ module.exports = {
     isPasswordValid,
     isEmailValid,
     isUuidValid,
+    isLongitudeValid,
+    isLatitudeValid,
+    isLocationValid
 };

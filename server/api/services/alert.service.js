@@ -1,13 +1,11 @@
 const alertQuery = require('../../data/queries/alert.query');
 const approvalQuery = require('../../data/queries/approval.query');
 const {convertToMetres} = require('../../helpers/unit.helper');
-const {throwInCase, trowInCaseLambda} = require('../../helpers/validation.helper');
-
-const alertRadius = 30;
+const {throwInCase, trowInCaseLambda, isLocationValid} = require('../../helpers/validation.helper');
 
 // TODO: make anti-spam system
-const createAlert = async ({userId, description, latitude, longitude}) => {
-    await alertQuery.insert({userId, description, latitude, longitude});
+const createAlert = ({userId, description, latitude, longitude}) => {
+    return alertQuery.insert({userId, description, latitude, longitude});
 };
 
 const approveAlert = async ({userId, alertId, approve}) => {
@@ -23,13 +21,11 @@ const approveAlert = async ({userId, alertId, approve}) => {
 };
 
 const findAlertsInRadius = ({latitude, longitude, radius = 30, unit = 'm', limit = 10}) => {
-    throwInCase(!(longitude && latitude), {message: 'Longitude or latitude is not valid', status: 400});
-    return {
-        alerts: alertQuery.findInRadius({radius: convertToMetres(unit, radius), longitude, latitude, limit}),
-        radius,
-        unit,
-        limit
-    };
+    if (!isLocationValid({latitude, longitude})) {
+        throw {message: 'Longitude or latitude is not valid', status: 400};
+    }
+    const alerts = alertQuery.findInRadius({radius: convertToMetres(unit, radius), longitude, latitude, limit});
+    return {alerts, radius, unit, limit};
 };
 
 module.exports = {

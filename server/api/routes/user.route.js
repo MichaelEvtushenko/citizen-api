@@ -3,6 +3,7 @@ const Router = require('koa-router');
 const userService = require('../services/user.service');
 const protectedRoute = require('../middlewares/protected.middleware');
 
+// TODO: /user -> /users
 const router = new Router({prefix: '/user'});
 
 router.get('/http', protectedRoute(), async ctx => {

@@ -1,14 +1,16 @@
 const knex = require('../db/connection');
 const {alertMapper} = require('../../helpers/query.helper');
 
-const insert = async ({userId, description, latitude, longitude}) => {
-    await knex('alerts')
+const insert = ({userId, description, latitude, longitude}) => {
+    return knex('alerts')
         .insert({
             user_id: userId,
             latitude,
             longitude,
             description
-        });
+        })
+        .returning('*')
+        .then(alertMapper);
 };
 
 const findInRadius = ({latitude, longitude, radius, limit}) => {
