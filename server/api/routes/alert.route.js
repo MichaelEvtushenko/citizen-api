@@ -21,13 +21,13 @@ router.patch('/:alertId/photos', protectedRoute(), upload.array('photos', 8), as
     ctx.set('Content-Location', photoUrls);
 });
 
-router.post('/approval/:alertId', protectedRoute(), async ctx => {
+router.post('/:alertId/approvals', protectedRoute(), async ctx => {
     const {userId} = ctx.state;
     const {alertId} = ctx.params;
-    const {approve} = ctx.query;
-    const approval = await alertService.approveAlert({userId, alertId, approve});
+    const {approved} = ctx.query;
+    const [approval] = await alertService.approveAlert({userId, alertId, approved});
     ctx.status = 200;
-    ctx.body = {approve: approval.approve};
+    ctx.body = {approved: approval.approved};
 });
 
 router.get('/', async ctx => {

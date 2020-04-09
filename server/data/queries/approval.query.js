@@ -1,12 +1,12 @@
 const knex = require('../db/connection');
 const {approvalMapper} = require('../../helpers/query.helper');
 
-const insert = ({userId, alertId, approve}) => {
+const insert = ({userId, alertId, approved}) => {
     return knex('approvals')
         .insert({
             user_id: userId,
             alert_id: alertId,
-            approve
+            approved
         }).returning('*')
         .then(approvalMapper);
 };

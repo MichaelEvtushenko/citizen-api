@@ -9,7 +9,7 @@ const createAlert = ({userId, description, latitude, longitude}) => {
     return alertQuery.insert({userId, description, latitude, longitude});
 };
 
-const approveAlert = async ({userId, alertId, approve}) => {
+const approveAlert = async ({userId, alertId, approved}) => {
     const [alertFromDb] = await alertQuery.findByAlertId(alertId);
     throwInCase(!alertFromDb, {message: 'Not found', status: 404});
     const [approvalFromDb] = await approvalQuery.findByAlertIdAndUserId({userId, alertId});
@@ -17,8 +17,8 @@ const approveAlert = async ({userId, alertId, approve}) => {
         message: {message: 'Approval already created', approve: approvalFromDb.approve},
         status: 400
     }));
-    approve = approve === 'true';
-    return approvalQuery.insert({userId, alertId, approve});
+    approved = approved === 'true';
+    return approvalQuery.insert({userId, alertId, approved});
 };
 
 const findAlertsInRadius = ({latitude, longitude, radius = 30, unit = 'm', limit = 10}) => {
