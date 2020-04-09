@@ -8,7 +8,6 @@ module.exports = async (ctx, next) => {
         if (ctx.status === 500 && process.env.NODE_ENV === 'production') {
             ctx.body = 'Internal Server Error';
         }
-
         ctx.app.emit('error', err, ctx);
     }
 };
