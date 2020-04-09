@@ -38,9 +38,16 @@ const updatePhotoUrls = ({photoUrls, alertId}) => {
         .then(alertMapper);
 };
 
+const updateStatus = async ({alertId, status}) => {
+    await knex('alerts')
+        .where({alert_id: alertId})
+        .update({status});
+};
+
 module.exports = {
     insert,
     findInRadius,
     findByAlertId,
     updatePhotoUrls,
+    updateStatus,
 };

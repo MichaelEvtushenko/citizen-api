@@ -30,8 +30,17 @@ const findByAlertIdAndUserId = ({userId, alertId}) => {
         .then(approvalMapper);
 };
 
+const getStatistics = (alertId) => {
+    return knex.raw(
+            `SELECT count(*)                                      "allCount",
+                        count(CASE WHEN (approved = true) THEN 1 END) "approvesCount"
+                FROM approvals
+                WHERE alert_id=?`, [alertId]);
+};
+
 module.exports = {
     insert,
     countApprovals,
     findByAlertIdAndUserId,
+    getStatistics,
 };

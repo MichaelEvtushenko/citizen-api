@@ -26,6 +26,7 @@ router.post('/:alertId/approvals', protectedRoute(), async ctx => {
     const {alertId} = ctx.params;
     const {approved} = ctx.query;
     const [approval] = await alertService.approveAlert({userId, alertId, approved});
+    ctx.app.emit('approvalCreated', approval);
     ctx.status = 200;
     ctx.body = {approved: approval.approved};
 });
