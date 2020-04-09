@@ -28,8 +28,19 @@ const findByAlertId = (alertId) => {
         .then(alertMapper);
 };
 
+const updatePhotoUrls = ({photoUrls, alertId}) => {
+    return knex('alerts')
+        .update({
+            photo_urls: photoUrls
+        })
+        .where({alert_id: alertId})
+        .returning('*')
+        .then(alertMapper);
+};
+
 module.exports = {
     insert,
     findInRadius,
     findByAlertId,
+    updatePhotoUrls,
 };

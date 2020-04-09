@@ -1,13 +1,14 @@
 const knex = require('../db/connection');
 const {approvalMapper} = require('../../helpers/query.helper');
 
-const insert = async ({userId, alertId, approve}) => {
-    await knex('approvals')
+const insert = ({userId, alertId, approve}) => {
+    return knex('approvals')
         .insert({
             user_id: userId,
             alert_id: alertId,
             approve
-        });
+        }).returning('*')
+        .then(approvalMapper);
 };
 
 const countApprovals = (alertId) => {

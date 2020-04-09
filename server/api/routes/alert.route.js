@@ -4,35 +4,45 @@ const multer = require('@koa/multer');
 const protectedRoute = require('../middlewares/protected.middleware');
 const alertValidation = require('../middlewares/validation/alert.middleware');
 const alertService = require('../services/alert.service');
-const {created} = require('../../helpers/router.helper');
+const {API_ALERTS_URL} = require('../../helpers/url.helper');
 
 const router = new Router({prefix: '/alerts'});
 const upload = multer();
 
-const baseUri = 'api/alert/';
-
 router.post('/', protectedRoute(), alertValidation, async ctx => {
-    const {alertId} = await alertService.createAlert({userId: ctx.state.userId, ...ctx.state.alert});
-    created(ctx, `${baseUri}/${alertId}`);
+    const [{alertId}] = await alertService.createAlert({userId: ctx.state.userId, ...ctx.state.alert});
+    ctx.status = 201;
+    ctx.set('Location', `${API_ALERTS_URL}/${alertId}`);
 });
 
-const s3Helper = require('../../helpers/s3-bucket.helper');
-router.patch('/:alertId/photos', protectedRoute(), upload.array('photos', 4), async ctx => {
-    s3Helper.upload(ctx.request.files);
+router.patch('/:alertId/photos', protectedRoute(), upload.array('photos', 8), async ctx => {
+    const [{photoUrls}] = await alertService.uploadPhotos({files: ctx.files, alertId: ctx.params.alertId});
+    ctx.status = 204;
+    ctx.set('Content-Location', photoUrls);
 });
 
 router.post('/approval/:alertId', protectedRoute(), async ctx => {
     const {userId} = ctx.state;
     const {alertId} = ctx.params;
     const {approve} = ctx.query;
-    await alertService.approveAlert({userId, alertId, approve});
-    ctx.status = 204;
+    const approval = await alertService.approveAlert({userId, alertId, approve});
+    ctx.status = 200;
+    ctx.body = {approve: approval.approve};
 });
 
 router.get('/', async ctx => {
     const {lat: latitude, lng: longitude, ...params} = ctx.query;
     const {alerts, ...rest} = alertService.findAlertsInRadius({latitude, longitude, ...params});
+    ctx.status = 200;
     ctx.body = {alerts: await alerts, ...rest};
+});
+
+router.get('/:alertId', async ctx => {
+    const {alertId} = ctx.params;
+    const [alertFromDb] = await alertService.findByAlertId(alertId);
+    ctx.assert(alertFromDb, 404, 'Not Found');
+    ctx.status = 200;
+    ctx.body = alertFromDb;
 });
 
 module.exports = router;

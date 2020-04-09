@@ -24,8 +24,14 @@ const sessionRowMapper = entity => {
 };
 
 const alertRowMapper = entity => {
-    const {alert_id: alertId, user_id: userId, reported_at: reportedAt, ...rest} = entity;
-    return {alertId, userId, reportedAt, ...rest};
+    const {
+        alert_id: alertId,
+        user_id: userId,
+        reported_at: reportedAt,
+        photo_urls: photoUrls,
+        ...rest
+    } = entity;
+    return {alertId, userId, reportedAt, photoUrls, ...rest};
 };
 
 const approvalRowMapper = entity => {
