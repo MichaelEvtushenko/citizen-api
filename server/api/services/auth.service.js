@@ -30,6 +30,7 @@ const activateLink = async linkId => {
     const {userId, used, exp} = link;
     throwInCase(exp < Date.now(), {message: 'Link is expired', status: 400});
     throwInCase(used, {message: 'Link already activated', status: 400});
+
     await authLinkQuery.activateLink(linkId);
     await userQuery.enableUser(userId);
 };
@@ -37,13 +38,19 @@ const activateLink = async linkId => {
 const authenticate = async ({email, password, userAgent}) => {
     const [fromDb] = await userQuery.findByEmail(email);
     if (!fromDb) {
-        throw {status: 400, message: 'Email is wrong'};
+        throw {status: 401, message: 'Email is wrong'};
     }
+
     const {password: hash, userId, role, enabled} = fromDb;
-    throwInCase(!enabled, {message: 'Non-activated account', status: 400});
+    throwInCase(!enabled, {message: 'Non-activated account', status: 401});
     if (!await bcrypt.compare(password, hash)) {
-        throw {status: 400, message: 'Password is wrong'};
+        throw {status: 401, message: 'Password is wrong'};
     }
+
+    if ((await sessionQuery.countByUserId(userId)) > 5) {
+        await sessionQuery.deleteByUserId(userId);
+    }
+
     const {refreshToken} = await createRefreshToken({userAgent, userId});
     return {
         accessToken: jwtHelper.generateToken({userId, role}),
@@ -73,13 +80,14 @@ const refreshToken = async ({refreshToken, userAgent}) => {
     if (expiredAt < Date.now()) {
         throw {message: 'Refresh token expired', status: 401};
     }
+
     // Attempt to hack
     if (fromDb.userAgent !== userAgent) {
         console.warn('Attempt to authorize from unknown user-agent:', userAgent);
-        console.warn('User-agent from db:', fromdb.userAgent);
-        // await sessionQuery.deleteByUserId(fromDb.userId);
+        console.warn('User-agent from DB:', fromDb.userAgent);
         throw {message: 'Unauthorized', status: 401};
     }
+
     const newRefreshToken = uuid.v4();
     await sessionQuery.updateRefreshToken({refreshToken, newRefreshToken});
     return {

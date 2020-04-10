@@ -12,16 +12,11 @@ const createTransporter = async () => {
 
 const sendEmail = async (to, subject, text) => {
     const transporter = await createTransporter();
-    transporter.sendMail({to, subject, text}, (err, info) => {
-        if (err) {
-            throw err;
-        }
-        console.log(`Activation message was sent to: <${info.accepted}>. Response: ${info.response.split(' ')[2]}.`);
-    });
+    await transporter.sendMail({to, subject, text});
+    console.log(`Activation message was sent to: <${info.accepted}>. Response: ${info.response.split(' ')[2]}.`);
 };
 
 const sendActivationCode = async ({email, linkId, fullName}) => {
-    // TODO: fix hard-coded url
     const activationUrl = 'http://localhost:3000/api/auth/activate';
     const emailBody = `Hi, ${fullName}.\nPlease activate your account: ${activationUrl}/${linkId}.`;
     await sendEmail(email, 'Activation code', emailBody);
