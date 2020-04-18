@@ -22,7 +22,20 @@ const activateLink = async linkId => {
     return authLinkQuery.activateLink(linkId);
 };
 
+const removeExpiredLinks = async () => {
+    try {
+        const links = await authLinkQuery.findExpiredLink(Date.now());
+        for (const id of links.map(l => l.linkId)) {
+            await authLinkQuery.deleteById(id);
+            console.log(`Auth link was deleted [ID: ${id}]`);
+        }
+    } catch (e) {
+        console.error('Error occurred while deleting links:', e);
+    }
+};
+
 module.exports = {
     createAuthLink,
     activateLink,
+    removeExpiredLinks,
 };

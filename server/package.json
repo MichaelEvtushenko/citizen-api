@@ -19,6 +19,7 @@
   "homepage": "https://github.com/MichaelEvtushenko/js-course#readme",
   "dependencies": {
     "bcrypt": "^4.0.1",
+    "cron": "^1.8.2",
     "cryptojs": "^2.5.3",
     "knex": "^0.20.12",
     "koa": "^2.11.0",
