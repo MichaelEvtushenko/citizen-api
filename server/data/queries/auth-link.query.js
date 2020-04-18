@@ -10,18 +10,6 @@ const insert = ({userId, exp, linkId}) => {
         })
         .returning('*')
         .then(authLinkMapper);
-
-};
-
-// TODO: fix ...rest
-const update = ({linkId, ...rest}) => {
-    return knex('auth_links')
-        .update({
-            ...rest
-        })
-        .where({link_id: linkId})
-        .returning('*')
-        .then(authLinkMapper);
 };
 
 const findByLinkId = linkId => {
@@ -43,7 +31,6 @@ const activateLink = async linkId => {
 
 module.exports = {
     insert,
-    update,
     findByLinkId,
     activateLink,
 };
