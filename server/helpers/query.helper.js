@@ -1,7 +1,6 @@
 // map result set, iterating by each row
 const resultSetMapper = rowMapper => res => res.length ? res.map(rowMapper || (v => v)) : res;
 
-// map row
 const userRowMapper = entity => {
     const {user_id: userId, full_name: fullName, created_at: createdAt, ...rest} = entity;
     return {userId, fullName, createdAt, ...rest};

@@ -11,9 +11,13 @@ const createTransporter = async () => {
 };
 
 const sendEmail = async (to, subject, text) => {
-    const transporter = await createTransporter();
-    await transporter.sendMail({to, subject, text});
-    console.log(`Activation message was sent to: <${info.accepted}>. Response: ${info.response.split(' ')[2]}.`);
+    try {
+        const transporter = await createTransporter();
+        const info = await transporter.sendMail({to, subject, html: text});
+        console.log(`Activation message was sent to: <${info.accepted}>. Response: ${info.response.split(' ')[2]}.`);
+    } catch (e) {
+        console.error('Error occurred while sending email:', e);
+    }
 };
 
 const sendActivationCode = async ({email, linkId, fullName}) => {

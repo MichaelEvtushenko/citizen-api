@@ -9,7 +9,7 @@ const router = new Router({prefix: '/auth'});
 
 router.post('/activate/:linkId', async ctx => {
     const linkId = ctx.params.linkId;
-    await authService.activateLink(linkId);
+    await authService.activateAccount(linkId);
     ctx.status = 204;
 });
 
