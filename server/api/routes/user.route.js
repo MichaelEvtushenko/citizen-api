@@ -25,4 +25,3 @@ router.get('/:userId', async ctx => {
 });
 
 module.exports = router;
-

@@ -21,8 +21,7 @@ router.post('/login', signInMiddleware, async ctx => {
 });
 
 router.post('/register', registerMiddleware, async ctx => {
-    await authService.register(ctx.state.user);
-    ctx.status = 204;
+    ctx.status = 200;
     ctx.body = await authService.register(ctx.state.user);
 });
 

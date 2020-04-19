@@ -15,6 +15,7 @@ const activateLink = async linkId => {
     throwInCase(!linkId, {message: 'Bad Request', status: 400});
     const [link] = await authLinkQuery.findByLinkId(linkId);
     throwInCase(!link, {message: 'Link does not exist', status: 400});
+
     const {used, exp} = link;
     throwInCase(exp < Date.now(), {message: 'Link is expired', status: 400});
     throwInCase(used, {message: 'Link already activated', status: 400});

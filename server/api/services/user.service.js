@@ -10,7 +10,7 @@ const createUser = async ({email, password, fullName}) => {
     if (byEmail) {
         throw {status: 400, message: 'Email is already taken'};
     }
-    hash = await bcrypt.hash(password, securityConfig.saltRounds);
+    const hash = await bcrypt.hash(password, securityConfig.saltRounds);
     return userQuery.create({email, hash, fullName});
 };
 
