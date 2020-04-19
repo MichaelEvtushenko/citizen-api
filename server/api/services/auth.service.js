@@ -73,8 +73,8 @@ const refreshToken = async ({refreshToken, userAgent}) => {
     if (expiredAt < Date.now()) {
         throw {message: 'Refresh token expired', status: 401};
     }
-    // Attempt to hack
     if (fromDb.userAgent !== userAgent) {
+        // Attempt to hack
         console.warn('Attempt to authorize from unknown user-agent:', userAgent);
         console.warn('User-agent from db:', fromdb.userAgent);
         // await sessionQuery.deleteByUserId(fromDb.userId);

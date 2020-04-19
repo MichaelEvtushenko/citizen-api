@@ -1,4 +1,5 @@
 const Koa = require('koa');
+
 const setupRoutes = require('./api/routes/index');
 const setupMiddlewares = require('./api/middlewares/index');
 const setupListeners = require('./api/listeners/index');
