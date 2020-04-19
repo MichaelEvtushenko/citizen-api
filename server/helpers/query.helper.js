@@ -22,8 +22,26 @@ const sessionRowMapper = entity => {
     return {refreshToken, userId, userAgent, expiredAt, ...rest};
 };
 
+const alertRowMapper = entity => {
+    const {
+        alert_id: alertId,
+        user_id: userId,
+        reported_at: reportedAt,
+        photo_urls: photoUrls,
+        ...rest
+    } = entity;
+    return {alertId, userId, reportedAt, photoUrls, ...rest};
+};
+
+const approvalRowMapper = entity => {
+    const {alert_id: alertId, user_id: userId, ...rest} = entity;
+    return {alertId, userId, ...rest};
+};
+
 module.exports = {
     userMapper: resultSetMapper(userRowMapper),
     authLinkMapper: resultSetMapper(authLinkRowMapper),
     sessionMapper: resultSetMapper(sessionRowMapper),
+    alertMapper: resultSetMapper(alertRowMapper),
+    approvalMapper: resultSetMapper(approvalRowMapper),
 };
