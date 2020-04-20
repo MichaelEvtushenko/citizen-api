@@ -39,11 +39,12 @@ const uploadPhotos = async ({files, alertId}) => {
 
     const links = (await Promise.all(s3BucketHelper.upload(files)))
         .map(res => res.Location);
+
     return alertQuery.updatePhotoUrls({alertId, photoUrls: links});
 };
 
 const findByAlertId = (alertId) => {
-    throwInCase(alertId <= 0, {message: `Alert ID is not valid`, status: 400});
+    throwInCase(alertId <= 0, {message: `Not Found`, status: 404});
     return alertQuery.findByAlertId(alertId);
 };
 
@@ -51,16 +52,21 @@ const updateAlertStatus = async (alertId) => {
     try {
         const {rows: [{allCount, approvesCount}]} = await approvalQuery.getStatistics(alertId);
         const ratio = allCount > 1 ? Math.round(100 * (approvesCount / allCount)) : 0;
+        if (!ratio) return;
 
-        if (ratio >= 75) {
+        const [{status}] = await alertQuery.findByAlertId(alertId);
+        if (ratio >= 75 && status !== 'red') {
             await alertQuery.updateStatus({alertId, status: 'red'});
             console.log(`Alert [ID: ${alertId}] changed status -> 'red'`);
-        } else if (ratio >= 50) {
+        } else if (ratio >= 50 && status !== 'yellow') {
             await alertQuery.updateStatus({alertId, status: 'yellow'});
             console.log(`Alert [ID: ${alertId}] changed status -> 'yellow'`);
+        } else if (status !== 'grey') {
+            await alertQuery.updateStatus({alertId, status: 'grey'});
+            console.log(`Alert [ID: ${alertId}] changed status -> 'grey'`);
         }
     } catch (e) {
-        console.error(e);
+        console.error('Error occurred while updating alert status:', e);
     }
 };
 

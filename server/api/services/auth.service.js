@@ -8,7 +8,6 @@ const emailHelper = require('../../helpers/email.helper');
 const {throwInCase, isUuidValid} = require('../../helpers/validation.helper');
 const jwtConfig = require('../../config/jwt.config');
 const sessionQuery = require('../../data/queries/session.query');
-const userQuery = require('../../data/queries/user.query');
 
 // TODO: make it transactional
 const register = async ({email, password, fullName}) => {
@@ -19,22 +18,21 @@ const register = async ({email, password, fullName}) => {
 
 const activateAccount = async linkId => {
     const [{userId}] = await authLinkService.activateLink(linkId);
-    await userQuery.enableUser(userId);
+    await userService.enableUser(userId);
 };
 
 const authenticate = async ({email, password, userAgent}) => {
-    const [fromDb] = await userQuery.findByEmail(email);
-    if (!fromDb) {
-        throw {status: 401, message: 'Email is wrong'};
-    }
+    const [fromDb] = await userService.findByEmail(email);
+    throwInCase(!fromDb, {status: 401, message: 'Email is wrong'});
 
     const {password: hash, userId, role, enabled} = fromDb;
     throwInCase(!enabled, {message: 'Non-activated account', status: 401});
+
     if (!await bcrypt.compare(password, hash)) {
         throw {status: 401, message: 'Password is wrong'};
     }
 
-    if ((await sessionQuery.countByUserId(userId)) > 5) {
+    if ((await sessionQuery.countByUserId(userId)) >= 5) {
         await sessionQuery.deleteByUserId(userId);
     }
 
@@ -50,7 +48,13 @@ const logout = async refreshToken => {
     await sessionQuery.deleteByRefreshToken(refreshToken);
 };
 
-const logoutAll = async userId => await sessionQuery.deleteByUserId(userId);
+const logoutAll = async userId => {
+    if (+userId) {
+        await sessionQuery.deleteByUserId(userId)
+    } else {
+        throw {message: 'Bad Request', status: 400};
+    }
+}
 
 const createRefreshToken = async ({userId, userAgent}) => {
     const expiredAt = Date.now() + jwtConfig.refreshTokenExpiresIn;
