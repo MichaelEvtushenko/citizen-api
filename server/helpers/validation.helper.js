@@ -12,7 +12,9 @@ const isLongitudeValid = longitude => longitude && Math.abs(longitude) <= 180;
 
 const isLatitudeValid = latitude => latitude && Math.abs(latitude) <= 90;
 
-const isLocationValid = () => ({latitude, longitude}) => isLatitudeValid(latitude) && isLongitudeValid(longitude);
+const isLocationValid = ({latitude, longitude}) => isLatitudeValid(latitude) && isLongitudeValid(longitude);
+
+const isStringValid = str => str && str.trim();
 
 const throwInCase = (result, ex) => {
     if (result && ex)
@@ -36,5 +38,6 @@ module.exports = {
     isUuidValid,
     isLongitudeValid,
     isLatitudeValid,
-    isLocationValid
+    isLocationValid,
+    isStringValid,
 };

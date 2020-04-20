@@ -58,6 +58,9 @@ const updateAlertStatus = async (alertId) => {
         } else if (ratio >= 50) {
             await alertQuery.updateStatus({alertId, status: 'yellow'});
             console.log(`Alert [ID: ${alertId}] changed status -> 'yellow'`);
+        } else {
+            await alertQuery.updateStatus({alertId, status: 'grey'});
+            console.log(`Alert [ID: ${alertId}] changed status -> 'grey'`);
         }
     } catch (e) {
         console.error(e);

@@ -4,7 +4,7 @@ const multer = require('@koa/multer');
 const protectedRoute = require('../middlewares/protected.middleware');
 const alertValidation = require('../middlewares/validation/alert.middleware');
 const alertService = require('../services/alert.service');
-const {API_ALERTS_URL} = require('../../helpers/url.helper');
+const {API_ALERTS_URL} = require('../../config/url.config');
 
 const router = new Router({prefix: '/alerts'});
 const upload = multer();

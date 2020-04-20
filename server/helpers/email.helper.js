@@ -1,5 +1,7 @@
 const nodemailer = require('nodemailer');
 
+const {API_ACTIVATE_URL} = require('../config/url.config');
+
 const createTransporter = () => {
     return nodemailer.createTransport({
         host: 'smtp.gmail.com',
@@ -23,8 +25,8 @@ const sendEmail = async (to, subject, text) => {
 };
 
 const sendActivationCode = async ({email, linkId, fullName}) => {
-    const activationUrl = 'http://localhost:3000/api/auth/activate';
-    const emailBody = `Hi, ${fullName}.\nPlease activate your account: ${activationUrl}/${linkId}.`;
+    const emailBody = `Hi, ${fullName}!
+    \rPlease activate your account: ${API_ACTIVATE_URL}/${linkId}`;
     await sendEmail(email, 'Activation code', emailBody);
 };
 
