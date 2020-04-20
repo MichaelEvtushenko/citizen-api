@@ -1,7 +1,7 @@
 const {v4: uuid} = require('uuid');
 
 const authLinkQuery = require('../../data/queries/auth-link.query');
-const {throwInCase} = require('../../helpers/validation.helper');
+const {throwInCase, isUuidValid} = require('../../helpers/validation.helper');
 const securityConfig = require('../../config/security.config');
 
 
@@ -12,7 +12,7 @@ const createAuthLink = ({userId}) => {
 
 // TODO: make it transactional
 const activateLink = async linkId => {
-    throwInCase(!linkId, {message: 'Bad Request', status: 400});
+    throwInCase(!isUuidValid(linkId), {message: 'Bad Request', status: 400});
     const [link] = await authLinkQuery.findByLinkId(linkId);
     throwInCase(!link, {message: 'Link does not exist', status: 400});
 

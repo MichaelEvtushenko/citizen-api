@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 
 const userQuery = require('../../data/queries/user.query');
 const securityConfig = require('../../config/security.config');
+const {isEmailValid} = require('../../helpers/validation.helper');
 
 const getById = id => userQuery.getById(id);
 
@@ -14,7 +15,13 @@ const createUser = async ({email, password, fullName}) => {
     return userQuery.create({email, hash, fullName});
 };
 
+const enableUser = async (userId) => await userQuery.enableUser(userId);
+
+const findByEmail = email => isEmailValid(email) ? userQuery.findByEmail(email) : [];
+
 module.exports = {
     getById,
     createUser,
+    enableUser,
+    findByEmail,
 };
