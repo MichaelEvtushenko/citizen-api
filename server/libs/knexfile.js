@@ -1,5 +1,3 @@
-const path = require('path');
-
 module.exports = {
     development: {
         client: 'pg',
@@ -14,13 +12,12 @@ module.exports = {
             max: 10
         },
         migrations: {
-            directory: './data/migrations'
+            directory: '../data/migrations'
         },
         seeds: {
-            directory: './data/seeds'
+            directory: '../data/seeds'
         }
     },
 
-    production: {
-    }
+    production: {}
 };
