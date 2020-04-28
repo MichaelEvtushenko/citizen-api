@@ -1,7 +1,7 @@
 const jwtHelper = require('../../helpers/jwt.helper');
 
 module.exports = (roles = []) => {
-    return async (ctx, next) => {
+    return (ctx, next) => {
         const {authorization} = ctx.headers;
         ctx.assert(authorization, 401, 'Authorization header missed');
 

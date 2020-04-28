@@ -45,6 +45,12 @@ const joinUserByRefreshToken = (refreshToken) => {
         .then(userMapper);
 };
 
+const countByUserId = (userId) => {
+    return knex('sessions')
+        .where({user_id: userId})
+        .count('*');
+};
+
 module.exports = {
     insert,
     findByRefreshToken,
@@ -52,4 +58,5 @@ module.exports = {
     updateRefreshToken,
     deleteByRefreshToken,
     joinUserByRefreshToken,
+    countByUserId,
 };

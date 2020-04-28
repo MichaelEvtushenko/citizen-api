@@ -1,7 +1,7 @@
 const knex = require('../db/connection');
 const {userMapper} = require('../../helpers/query.helper');
 
-// TODO: fix method name
+// TODO: fix method naming: get... -> find...
 const getById = id => {
     return knex('users')
         .select('*')
@@ -28,7 +28,7 @@ const create = user => {
         .then(userMapper);
 };
 
-// @Deprecated
+// TODO: fix ...rest
 const update = ({userId, ...rest}) => {
     return knex('users')
         .where({

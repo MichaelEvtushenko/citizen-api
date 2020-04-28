@@ -10,18 +10,6 @@ const insert = ({userId, exp, linkId}) => {
         })
         .returning('*')
         .then(authLinkMapper);
-
-};
-
-// TODO: fix ...rest
-const update = ({linkId, ...rest}) => {
-    return knex('auth_links')
-        .update({
-            ...rest
-        })
-        .where({link_id: linkId})
-        .returning('*')
-        .then(authLinkMapper);
 };
 
 const findByLinkId = linkId => {
@@ -33,19 +21,32 @@ const findByLinkId = linkId => {
         .then(authLinkMapper);
 };
 
-const activateLink = async linkId => {
-    await knex('auth_links')
+const activateLink = linkId => {
+    return knex('auth_links')
         .update({used: true})
         .where({
             link_id: linkId,
-        });
+        })
+        .returning('*')
+        .then(authLinkMapper);
+};
+
+const findExpiredLink = date => {
+    return knex('auth_links')
+        .where('exp', '<', date)
+        .then(authLinkMapper);
+};
+
+const deleteById = async linkId => {
+    await knex('auth_links')
+        .where({link_id: linkId})
+        .del();
 };
 
 module.exports = {
     insert,
-    update,
     findByLinkId,
     activateLink,
+    findExpiredLink,
+    deleteById,
 };
-
-
