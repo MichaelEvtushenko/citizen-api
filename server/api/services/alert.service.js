@@ -4,6 +4,12 @@ const {convertToMetres} = require('../../helpers/unit.helper');
 const {throwInCase, trowInCaseLambda, isLocationValid} = require('../../helpers/validation.helper');
 const s3BucketHelper = require('../../helpers/s3-bucket.helper');
 
+const STATUS = Object.freeze({
+    RED: 'red',
+    YELLOW: 'yellow',
+    GREY: 'grey'
+});
+
 // TODO: make anti-spam system
 const createAlert = ({userId, description, latitude, longitude}) => {
     return alertQuery.insert({userId, description, latitude, longitude});
@@ -49,24 +55,23 @@ const findByAlertId = (alertId) => {
 };
 
 const updateAlertStatus = async (alertId) => {
-    try {
-        const {rows: [{allCount, approvesCount}]} = await approvalQuery.getStatistics(alertId);
-        const ratio = allCount > 1 ? Math.round(100 * (approvesCount / allCount)) : 0;
-        if (!ratio) return;
+    const {rows: [{allCount, approvesCount}]} = await approvalQuery.getStatistics(alertId);
+    const ratio = allCount > 1 ? Math.round(100 * (approvesCount / allCount)) : 0;
+    if (!ratio) return;
 
-        const [{status}] = await alertQuery.findByAlertId(alertId);
-        if (ratio >= 75 && status !== 'red') {
-            await alertQuery.updateStatus({alertId, status: 'red'});
-            console.log(`Alert [ID: ${alertId}] changed status -> 'red'`);
-        } else if (ratio >= 50 && status !== 'yellow') {
-            await alertQuery.updateStatus({alertId, status: 'yellow'});
-            console.log(`Alert [ID: ${alertId}] changed status -> 'yellow'`);
-        } else if (status !== 'grey') {
-            await alertQuery.updateStatus({alertId, status: 'grey'});
-            console.log(`Alert [ID: ${alertId}] changed status -> 'grey'`);
-        }
-    } catch (e) {
-        console.error('Error occurred while updating alert status:', e);
+    const [{status}] = await alertQuery.findByAlertId(alertId);
+    let updatedStatus;
+
+    if (ratio >= 75 && status !== STATUS.RED)
+        updatedStatus = STATUS.RED;
+    else if (ratio >= 50 && status !== STATUS.YELLOW)
+        updatedStatus = STATUS.YELLOW;
+    else if (status !== STATUS.GREY)
+        updatedStatus = STATUS.GREY;
+
+    if (updatedStatus) {
+        await alertQuery.updateStatus({alertId, status: updatedStatus});
+        console.log(`Alert [ID: ${alertId}] changed status -> '${updatedStatus}'`);
     }
 };
 
