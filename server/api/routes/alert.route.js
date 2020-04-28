@@ -26,6 +26,7 @@ router.post('/:alertId/approvals', protectedRoute(), async ctx => {
     const {alertId} = ctx.params;
     const {approved} = ctx.query;
     const [approval] = await alertService.approveAlert({userId, alertId, approved});
+    ctx.app.emit('approvalCreated', approval);
     ctx.status = 200;
     ctx.body = {approved: approval.approved};
 });
@@ -39,10 +40,9 @@ router.get('/', async ctx => {
 
 router.get('/:alertId', async ctx => {
     const {alertId} = ctx.params;
-    const [alertFromDb] = await alertService.findByAlertId(alertId);
-    ctx.assert(alertFromDb, 404, 'Not Found');
+    const detailsAlert = await alertService.findDetailsAlert(alertId);
     ctx.status = 200;
-    ctx.body = alertFromDb;
+    ctx.body = detailsAlert;
 });
 
 module.exports = router;

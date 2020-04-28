@@ -49,9 +49,17 @@ const uploadPhotos = async ({files, alertId}) => {
     return alertQuery.updatePhotoUrls({alertId, photoUrls: links});
 };
 
-const findByAlertId = (alertId) => {
+const findByAlertId = async (alertId) => {
     throwInCase(alertId <= 0, {message: `Not Found`, status: 404});
     return alertQuery.findByAlertId(alertId);
+};
+
+const findDetailsAlert = async (alertId) => {
+    const [alertFromDb] = await findByAlertId(alertId);
+    throwInCase(!alertFromDb, {message: `Not Found`, status: 404});
+
+    const {rows: [{allCount, approvesCount}]} = await approvalQuery.getStatistics(alertId);
+    return {alert: alertFromDb, approvalCount: allCount, approvesCount};
 };
 
 const updateAlertStatus = async (alertId) => {
@@ -82,4 +90,5 @@ module.exports = {
     uploadPhotos,
     findByAlertId,
     updateAlertStatus,
+    findDetailsAlert,
 };
