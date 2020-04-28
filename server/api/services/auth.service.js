@@ -26,13 +26,15 @@ const authenticate = async ({email, password, userAgent}) => {
     throwInCase(!fromDb, {status: 401, message: 'Email is wrong'});
 
     const {password: hash, userId, role, enabled} = fromDb;
-    throwInCase(!enabled, {message: 'Non-activated account', status: 401});
+    throwInCase(!enabled, {message: 'Unactivated account', status: 401});
 
     if (!await bcrypt.compare(password, hash)) {
         throw {status: 401, message: 'Password is wrong'};
     }
 
-    if ((await sessionQuery.countByUserId(userId)) >= 5) {
+    const [{count}] = await sessionQuery.countByUserId(userId);
+
+    if (count >= 5) {
         await sessionQuery.deleteByUserId(userId);
     }
 

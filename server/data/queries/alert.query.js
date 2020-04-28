@@ -44,10 +44,17 @@ const updateStatus = async ({alertId, status}) => {
         .update({status});
 };
 
+const deleteByAlertId = (alertId) => {
+    return knex('alerts')
+        .where({alert_id: alertId})
+        .del();
+};
+
 module.exports = {
     insert,
     findInRadius,
     findByAlertId,
     updatePhotoUrls,
     updateStatus,
+    deleteByAlertId,
 };

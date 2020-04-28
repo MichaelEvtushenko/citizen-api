@@ -54,7 +54,7 @@ const findByAlertId = async (alertId) => {
     return alertQuery.findByAlertId(alertId);
 };
 
-const findDetailsAlert = async (alertId) => {
+const findDetailAlert = async (alertId) => {
     const [alertFromDb] = await findByAlertId(alertId);
     throwInCase(!alertFromDb, {message: `Not Found`, status: 404});
 
@@ -83,6 +83,12 @@ const updateAlertStatus = async (alertId) => {
     }
 };
 
+const deleteAlert = async (alertId) => {
+    const [alertFromDb] = await findByAlertId(alertId);
+    throwInCase(alertId <= 0 || !alertFromDb, {message: 'Not Found', status: 404});
+    return alertQuery.deleteByAlertId(alertId);
+}
+
 module.exports = {
     createAlert,
     approveAlert,
@@ -90,5 +96,6 @@ module.exports = {
     uploadPhotos,
     findByAlertId,
     updateAlertStatus,
-    findDetailsAlert,
+    findDetailAlert,
+    deleteAlert,
 };

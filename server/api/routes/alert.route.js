@@ -40,9 +40,15 @@ router.get('/', async ctx => {
 
 router.get('/:alertId', async ctx => {
     const {alertId} = ctx.params;
-    const detailsAlert = await alertService.findDetailsAlert(alertId);
+    const detailsAlert = await alertService.findDetailAlert(alertId);
     ctx.status = 200;
     ctx.body = detailsAlert;
+});
+
+router.delete('/:alertId', protectedRoute(['moderator', 'admin']), async ctx => {
+    const {alertId} = ctx.params;
+    await alertService.deleteAlert(alertId);
+    ctx.status = 204;
 });
 
 module.exports = router;
