@@ -51,7 +51,7 @@ const uploadPhotos = async ({files, alertId}) => {
 };
 
 const findByAlertId = async (alertId) => {
-    throwInCase(alertId <= 0, {message: `Not Found`, status: 404});
+    throwInCase(!isIdValid(alertId), {message: `Not Found`, status: 404});
     return alertQuery.findByAlertId(alertId);
 };
 
@@ -85,15 +85,17 @@ const updateAlertStatus = async (alertId) => {
 };
 
 const deleteAlert = async (alertId) => {
+    const ex = {message: 'Not Found', status: 404};
+    throwInCase(!isIdValid(alertId), ex);
     const [alertFromDb] = await findByAlertId(alertId);
-    throwInCase(!alertFromDb, {message: 'Not Found', status: 404});
+    throwInCase(!alertFromDb, ex);
     return alertQuery.deleteByAlertId(alertId);
 };
 
 const createComment = ({alertId, userId, description}) => commentQuery.insert({alertId, userId, description});
 
 const findComments = ({alertId, limit = 10, offset = 0}) => {
-    throwInCase(alertId <= 0, {message: 'Alert id is not valid', status: 400});
+    throwInCase(!isIdValid(alertId), {message: 'Not Found', status: 404});
     const comments = commentQuery.find({alertId, limit, offset});
     return {comments, limit, offset};
 };

@@ -16,7 +16,7 @@ const isLocationValid = ({latitude, longitude}) => isLatitudeValid(latitude) && 
 
 const isStringValid = str => !!(str && str.trim());
 
-const isIdValid = id => id > 0;
+const isIdValid = id => !!(+id && id > 0);
 
 const throwInCase = (result, ex) => {
     if (result && ex)

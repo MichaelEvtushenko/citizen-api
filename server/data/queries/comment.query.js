@@ -21,14 +21,6 @@ const find = ({alertId, limit, offset}) => {
         .then(commentMapper);
 };
 
-const findByCommentId = (commentId) => {
-    return knex('comments')
-        .select('*')
-        .where({comment_id: commentId})
-        .then(commentMapper);
-
-};
-
 const update = ({alertId, description}) => {
     return knex('comments')
         .update({description})
@@ -39,7 +31,6 @@ const update = ({alertId, description}) => {
 
 module.exports = {
     insert,
-    findByCommentId,
     update,
     find,
 };
