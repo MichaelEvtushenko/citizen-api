@@ -4,7 +4,7 @@ exports.up = knex =>
         tableBuilder.string('email').notNullable().unique();
         tableBuilder.string('password', 60).notNullable();
         tableBuilder.string('full_name').notNullable();
-        tableBuilder.timestamp('created_at').defaultTo('now()');
+        tableBuilder.timestamp('created_at').defaultTo(knex.fn.now());
         tableBuilder.boolean('enabled').defaultTo(false);
         tableBuilder.enu('role', ['user', 'moderator', 'admin'],
             {useNative: true, enumName: 'roles'})

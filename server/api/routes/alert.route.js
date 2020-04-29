@@ -3,6 +3,7 @@ const multer = require('@koa/multer');
 
 const protectedRoute = require('../middlewares/protected.middleware');
 const alertValidation = require('../middlewares/validation/alert.middleware');
+const commentValidation = require('../middlewares/validation/comment.middleware');
 const alertService = require('../services/alert.service');
 const {API_ALERTS_URL} = require('../../config/url.config');
 
@@ -17,8 +18,8 @@ router.post('/', protectedRoute(), alertValidation, async ctx => {
 
 router.post('/:alertId/photos', protectedRoute(), upload.array('photos', 8), async ctx => {
     const [{photoUrls}] = await alertService.uploadPhotos({files: ctx.files, alertId: ctx.params.alertId});
-    ctx.status = 204;
-    ctx.set('Content-Location', photoUrls);
+    ctx.status = 201;
+    ctx.set('Location', photoUrls);
 });
 
 router.post('/:alertId/approvals', protectedRoute(), async ctx => {
@@ -29,6 +30,12 @@ router.post('/:alertId/approvals', protectedRoute(), async ctx => {
     ctx.app.emit('approvalCreated', approval);
     ctx.status = 200;
     ctx.body = {approved: approval.approved};
+});
+
+router.post('/:alertId/comments', protectedRoute(), commentValidation, async ctx => {
+    const [comment] = await alertService.createComment({userId: ctx.state.userId, ...ctx.state.comment});
+    ctx.status = 200;
+    ctx.body = comment;
 });
 
 router.get('/', async ctx => {
@@ -43,6 +50,13 @@ router.get('/:alertId', async ctx => {
     const detailsAlert = await alertService.findDetailAlert(alertId);
     ctx.status = 200;
     ctx.body = detailsAlert;
+});
+
+router.get('/:alertId/comments', protectedRoute(), async ctx => {
+    const {alertId} = ctx.params;
+    const {comments, ...rest} = alertService.findComments({alertId, ...ctx.query});
+    ctx.status = 200;
+    ctx.body = {comments: await comments, ...rest};
 });
 
 router.delete('/:alertId', protectedRoute(['moderator', 'admin']), async ctx => {

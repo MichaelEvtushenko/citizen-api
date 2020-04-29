@@ -17,6 +17,7 @@ const findInRadius = ({latitude, longitude, radius, limit}) => {
     return knex('alerts')
         .whereRaw('haversine(?, ?, alerts.latitude, alerts.longitude) * 1000 <= ?',
             [latitude, longitude, radius])
+        .orderBy('status')
         .limit(limit)
         .then(alertMapper);
 };

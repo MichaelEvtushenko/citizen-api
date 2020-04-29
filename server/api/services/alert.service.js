@@ -1,7 +1,8 @@
 const alertQuery = require('../../data/queries/alert.query');
 const approvalQuery = require('../../data/queries/approval.query');
+const commentQuery = require('../../data/queries/comment.query');
 const {convertToMetres} = require('../../helpers/unit.helper');
-const {throwInCase, trowInCaseLambda, isLocationValid} = require('../../helpers/validation.helper');
+const {throwInCase, trowInCaseLambda, isLocationValid, isIdValid} = require('../../helpers/validation.helper');
 const s3BucketHelper = require('../../helpers/s3-bucket.helper');
 
 const STATUS = Object.freeze({
@@ -29,7 +30,7 @@ const approveAlert = async ({userId, alertId, approved}) => {
     return approvalQuery.insert({userId, alertId, approved});
 };
 
-const findAlertsInRadius = ({latitude, longitude, radius = 30, unit = 'm', limit = 10}) => {
+const findAlertsInRadius = ({latitude, longitude, radius = 500, unit = 'm', limit = 10}) => {
     if (!isLocationValid({latitude, longitude}))
         throw {message: 'Longitude or latitude is not valid', status: 400};
 
@@ -59,7 +60,7 @@ const findDetailAlert = async (alertId) => {
     throwInCase(!alertFromDb, {message: `Not Found`, status: 404});
 
     const {rows: [{allCount, approvesCount}]} = await approvalQuery.getStatistics(alertId);
-    return {alert: alertFromDb, approvalCount: allCount, approvesCount};
+    return {...alertFromDb, approvalCount: allCount, approvesCount};
 };
 
 const updateAlertStatus = async (alertId) => {
@@ -85,9 +86,17 @@ const updateAlertStatus = async (alertId) => {
 
 const deleteAlert = async (alertId) => {
     const [alertFromDb] = await findByAlertId(alertId);
-    throwInCase(alertId <= 0 || !alertFromDb, {message: 'Not Found', status: 404});
+    throwInCase(!alertFromDb, {message: 'Not Found', status: 404});
     return alertQuery.deleteByAlertId(alertId);
-}
+};
+
+const createComment = ({alertId, userId, description}) => commentQuery.insert({alertId, userId, description});
+
+const findComments = ({alertId, limit = 10, offset = 0}) => {
+    throwInCase(alertId <= 0, {message: 'Alert id is not valid', status: 400});
+    const comments = commentQuery.find({alertId, limit, offset});
+    return {comments, limit, offset};
+};
 
 module.exports = {
     createAlert,
@@ -98,4 +107,6 @@ module.exports = {
     updateAlertStatus,
     findDetailAlert,
     deleteAlert,
+    createComment,
+    findComments,
 };
