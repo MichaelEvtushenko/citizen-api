@@ -11,7 +11,8 @@ const router = new Router({prefix: '/alerts'});
 const upload = multer();
 
 router.post('/', protectedRoute(), alertValidation, async ctx => {
-    const [{alertId}] = await alertService.createAlert({userId: ctx.state.userId, ...ctx.state.alert});
+    const [{alertId, ...rest}] = await alertService.createAlert({userId: ctx.state.userId, ...ctx.state.alert});
+    ctx.app.emit('alertCreated', {alertId, ...rest});
     ctx.status = 201;
     ctx.set('Location', `${API_ALERTS_URL}/${alertId}`);
 });

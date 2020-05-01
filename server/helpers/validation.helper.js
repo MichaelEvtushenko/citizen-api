@@ -18,6 +18,7 @@ const isStringValid = str => !!(str && str.trim());
 
 const isIdValid = id => !!(+id && id > 0);
 
+// TODO: carry throwInCase* to another separate file(helper)
 const throwInCase = (result, ex) => {
     if (result && ex)
         throw ex;
