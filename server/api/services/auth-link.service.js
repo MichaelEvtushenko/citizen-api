@@ -1,7 +1,8 @@
 const {v4: uuid} = require('uuid');
 
 const authLinkQuery = require('../../data/queries/auth-link.query');
-const {throwInCase, isUuidValid} = require('../../helpers/validation.helper');
+const {isUuidValid} = require('../../helpers/validation.helper');
+const {throwInCase} = require('../../helpers/exception.helper');
 const securityConfig = require('../../config/security.config');
 
 

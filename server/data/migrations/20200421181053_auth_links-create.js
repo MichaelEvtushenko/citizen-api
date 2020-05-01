@@ -8,4 +8,4 @@ exports.up = knex =>
     });
 
 exports.down = knex =>
-    knex.dropTableIfExists('auth_links');
+    knex.schema.dropTableIfExists('auth_links');

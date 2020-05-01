@@ -7,6 +7,8 @@ module.exports = {
                 return value * .3048;
             case 'km':
                 return value * 1000;
+            case 'mi':
+                return value * 1609;
             default:
                 throw {message: 'Unit not supported', status: 400};
         }

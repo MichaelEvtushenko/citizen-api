@@ -38,10 +38,16 @@ const approvalRowMapper = entity => {
     return {alertId, userId, ...rest};
 };
 
+const commentRowMapper = entity => {
+    const {comment_id: commentId, alert_id: alertId, user_id: userId, posted_at: postedAt, ...rest} = entity;
+    return {commentId, alertId, userId, postedAt, ...rest};
+}
+
 module.exports = {
     userMapper: resultSetMapper(userRowMapper),
     authLinkMapper: resultSetMapper(authLinkRowMapper),
     sessionMapper: resultSetMapper(sessionRowMapper),
     alertMapper: resultSetMapper(alertRowMapper),
     approvalMapper: resultSetMapper(approvalRowMapper),
+    commentMapper: resultSetMapper(commentRowMapper),
 };

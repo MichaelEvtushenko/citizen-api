@@ -6,8 +6,8 @@ exports.up = knex =>
         tableBuilder.decimal('latitude').notNullable();
         tableBuilder.decimal('longitude').notNullable();
         tableBuilder.text('description').notNullable();
-        tableBuilder.timestamp('reported_at').defaultTo('now()');
-        tableBuilder.enu('status', ['grey', 'yellow', 'red'],
+        tableBuilder.timestamp('reported_at').defaultTo(knex.fn.now());
+        tableBuilder.enu('status', ['red', 'yellow', 'grey'],
             {useNative: true, enumName: 'statuses'})
             .defaultTo('grey')
         tableBuilder.specificType('photo_urls', 'varchar(128)[]');

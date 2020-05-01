@@ -1,8 +1,16 @@
 const alertQuery = require('../../data/queries/alert.query');
 const approvalQuery = require('../../data/queries/approval.query');
+const commentQuery = require('../../data/queries/comment.query');
 const {convertToMetres} = require('../../helpers/unit.helper');
-const {throwInCase, trowInCaseLambda, isLocationValid} = require('../../helpers/validation.helper');
+const {isLocationValid, isIdValid} = require('../../helpers/validation.helper');
+const {throwInCase, trowInCaseLambda} = require('../../helpers/exception.helper');
 const s3BucketHelper = require('../../helpers/s3-bucket.helper');
+
+const STATUS = Object.freeze({
+    RED: 'red',
+    YELLOW: 'yellow',
+    GREY: 'grey'
+});
 
 // TODO: make anti-spam system
 const createAlert = ({userId, description, latitude, longitude}) => {
@@ -23,7 +31,7 @@ const approveAlert = async ({userId, alertId, approved}) => {
     return approvalQuery.insert({userId, alertId, approved});
 };
 
-const findAlertsInRadius = ({latitude, longitude, radius = 30, unit = 'm', limit = 10}) => {
+const findAlertsInRadius = ({latitude, longitude, radius = 500, unit = 'm', limit = 10}) => {
     if (!isLocationValid({latitude, longitude}))
         throw {message: 'Longitude or latitude is not valid', status: 400};
 
@@ -43,31 +51,54 @@ const uploadPhotos = async ({files, alertId}) => {
     return alertQuery.updatePhotoUrls({alertId, photoUrls: links});
 };
 
-const findByAlertId = (alertId) => {
-    throwInCase(alertId <= 0, {message: `Not Found`, status: 404});
+const findByAlertId = async (alertId) => {
+    throwInCase(!isIdValid(alertId), {message: `Not Found`, status: 404});
     return alertQuery.findByAlertId(alertId);
 };
 
-const updateAlertStatus = async (alertId) => {
-    try {
-        const {rows: [{allCount, approvesCount}]} = await approvalQuery.getStatistics(alertId);
-        const ratio = allCount > 1 ? Math.round(100 * (approvesCount / allCount)) : 0;
-        if (!ratio) return;
+const findDetailAlert = async (alertId) => {
+    const [alertFromDb] = await findByAlertId(alertId);
+    throwInCase(!alertFromDb, {message: `Not Found`, status: 404});
 
-        const [{status}] = await alertQuery.findByAlertId(alertId);
-        if (ratio >= 75 && status !== 'red') {
-            await alertQuery.updateStatus({alertId, status: 'red'});
-            console.log(`Alert [ID: ${alertId}] changed status -> 'red'`);
-        } else if (ratio >= 50 && status !== 'yellow') {
-            await alertQuery.updateStatus({alertId, status: 'yellow'});
-            console.log(`Alert [ID: ${alertId}] changed status -> 'yellow'`);
-        } else if (status !== 'grey') {
-            await alertQuery.updateStatus({alertId, status: 'grey'});
-            console.log(`Alert [ID: ${alertId}] changed status -> 'grey'`);
-        }
-    } catch (e) {
-        console.error('Error occurred while updating alert status:', e);
+    const {rows: [{allCount, approvesCount}]} = await approvalQuery.getStatistics(alertId);
+    return {...alertFromDb, approvalCount: allCount, approvesCount};
+};
+
+const updateAlertStatus = async (alertId) => {
+    const {rows: [{allCount, approvesCount}]} = await approvalQuery.getStatistics(alertId);
+    const ratio = allCount > 1 ? Math.round(100 * (approvesCount / allCount)) : 0;
+    if (!ratio) return;
+
+    const [{status}] = await alertQuery.findByAlertId(alertId);
+    let updatedStatus;
+
+    if (ratio >= 75 && status !== STATUS.RED)
+        updatedStatus = STATUS.RED;
+    else if (ratio >= 50 && status !== STATUS.YELLOW)
+        updatedStatus = STATUS.YELLOW;
+    else if (status !== STATUS.GREY)
+        updatedStatus = STATUS.GREY;
+
+    if (updatedStatus) {
+        await alertQuery.updateStatus({alertId, status: updatedStatus});
+        console.log(`Alert [ID: ${alertId}] changed status -> '${updatedStatus}'`);
     }
+};
+
+const deleteAlert = async (alertId) => {
+    const ex = {message: 'Not Found', status: 404};
+    throwInCase(!isIdValid(alertId), ex);
+    const [alertFromDb] = await findByAlertId(alertId);
+    throwInCase(!alertFromDb, ex);
+    return alertQuery.deleteByAlertId(alertId);
+};
+
+const createComment = ({alertId, userId, description}) => commentQuery.insert({alertId, userId, description});
+
+const findComments = ({alertId, limit = 10, offset = 0}) => {
+    throwInCase(!isIdValid(alertId), {message: 'Not Found', status: 404});
+    const comments = commentQuery.find({alertId, limit, offset});
+    return {comments, limit, offset};
 };
 
 module.exports = {
@@ -77,4 +108,8 @@ module.exports = {
     uploadPhotos,
     findByAlertId,
     updateAlertStatus,
+    findDetailAlert,
+    deleteAlert,
+    createComment,
+    findComments,
 };

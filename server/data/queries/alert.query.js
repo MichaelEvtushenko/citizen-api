@@ -17,6 +17,7 @@ const findInRadius = ({latitude, longitude, radius, limit}) => {
     return knex('alerts')
         .whereRaw('haversine(?, ?, alerts.latitude, alerts.longitude) * 1000 <= ?',
             [latitude, longitude, radius])
+        .orderBy('status')
         .limit(limit)
         .then(alertMapper);
 };
@@ -44,10 +45,17 @@ const updateStatus = async ({alertId, status}) => {
         .update({status});
 };
 
+const deleteByAlertId = (alertId) => {
+    return knex('alerts')
+        .where({alert_id: alertId})
+        .del();
+};
+
 module.exports = {
     insert,
     findInRadius,
     findByAlertId,
     updatePhotoUrls,
     updateStatus,
+    deleteByAlertId,
 };

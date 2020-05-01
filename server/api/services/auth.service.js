@@ -5,7 +5,8 @@ const userService = require('./user.service');
 const authLinkService = require('./auth-link.service');
 const jwtHelper = require('../../helpers/jwt.helper');
 const emailHelper = require('../../helpers/email.helper');
-const {throwInCase, isUuidValid} = require('../../helpers/validation.helper');
+const {isUuidValid} = require('../../helpers/validation.helper');
+const {throwInCase} = require('../../helpers/exception.helper');
 const jwtConfig = require('../../config/jwt.config');
 const sessionQuery = require('../../data/queries/session.query');
 
@@ -26,13 +27,15 @@ const authenticate = async ({email, password, userAgent}) => {
     throwInCase(!fromDb, {status: 401, message: 'Email is wrong'});
 
     const {password: hash, userId, role, enabled} = fromDb;
-    throwInCase(!enabled, {message: 'Non-activated account', status: 401});
+    throwInCase(!enabled, {message: 'Unactivated account', status: 401});
 
     if (!await bcrypt.compare(password, hash)) {
         throw {status: 401, message: 'Password is wrong'};
     }
 
-    if ((await sessionQuery.countByUserId(userId)) >= 5) {
+    const [{count}] = await sessionQuery.countByUserId(userId);
+
+    if (count >= 5) {
         await sessionQuery.deleteByUserId(userId);
     }
 
