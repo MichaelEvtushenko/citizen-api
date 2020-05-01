@@ -5,7 +5,8 @@ const userService = require('./user.service');
 const authLinkService = require('./auth-link.service');
 const jwtHelper = require('../../helpers/jwt.helper');
 const emailHelper = require('../../helpers/email.helper');
-const {throwInCase, isUuidValid} = require('../../helpers/validation.helper');
+const {isUuidValid} = require('../../helpers/validation.helper');
+const {throwInCase} = require('../../helpers/exception.helper');
 const jwtConfig = require('../../config/jwt.config');
 const sessionQuery = require('../../data/queries/session.query');
 

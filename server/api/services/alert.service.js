@@ -2,7 +2,8 @@ const alertQuery = require('../../data/queries/alert.query');
 const approvalQuery = require('../../data/queries/approval.query');
 const commentQuery = require('../../data/queries/comment.query');
 const {convertToMetres} = require('../../helpers/unit.helper');
-const {throwInCase, trowInCaseLambda, isLocationValid, isIdValid} = require('../../helpers/validation.helper');
+const {isLocationValid, isIdValid} = require('../../helpers/validation.helper');
+const {throwInCase, trowInCaseLambda} = require('../../helpers/exception.helper');
 const s3BucketHelper = require('../../helpers/s3-bucket.helper');
 
 const STATUS = Object.freeze({
