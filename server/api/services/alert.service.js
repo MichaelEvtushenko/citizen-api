@@ -2,9 +2,9 @@ const alertQuery = require('../../data/queries/alert.query');
 const approvalQuery = require('../../data/queries/approval.query');
 const commentQuery = require('../../data/queries/comment.query');
 const {convertToMetres} = require('../../helpers/unit.helper');
-const {isLocationValid, isIdValid} = require('../../helpers/validation.helper');
 const {throwInCase, trowInCaseLambda} = require('../../helpers/exception.helper');
-const s3BucketHelper = require('../../helpers/s3-bucket.helper');
+const {isLocationValid, isIdValid} = require('../../helpers/validation.helper');
+const {uploadFiles, deleteFiles, Path, extractKeys} = require('../../helpers/s3-bucket.helper');
 
 const STATUS = Object.freeze({
     RED: 'red',
@@ -45,7 +45,7 @@ const uploadPhotos = async ({files, alertId}) => {
     const [fromDb] = await findByAlertId(alertId);
     throwInCase(!fromDb, ex);
 
-    const links = (await Promise.all(s3BucketHelper.upload(files)))
+    const links = (await Promise.all(uploadFiles({files, path: Path.ALERTS_PHOTOS})))
         .map(res => res.Location);
 
     return alertQuery.updatePhotoUrls({alertId, photoUrls: links});
@@ -89,7 +89,13 @@ const deleteAlert = async (alertId) => {
     const ex = {message: 'Not Found', status: 404};
     throwInCase(!isIdValid(alertId), ex);
     const [alertFromDb] = await findByAlertId(alertId);
+    console.log(alertFromDb);
     throwInCase(!alertFromDb, ex);
+
+    const {photoUrls: urls} = alertFromDb;
+    if (urls) {
+        await deleteFiles({urls, path: Path.ALERTS_PHOTOS});
+    }
     return alertQuery.deleteByAlertId(alertId);
 };
 
