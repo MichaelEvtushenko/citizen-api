@@ -45,6 +45,5 @@ const extractKeys = (urls = []) => {
 module.exports = {
     uploadFiles,
     deleteFiles,
-    extractKeys,
     Path,
 };

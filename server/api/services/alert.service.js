@@ -4,7 +4,7 @@ const commentQuery = require('../../data/queries/comment.query');
 const {convertToMetres} = require('../../helpers/unit.helper');
 const {throwInCase, trowInCaseLambda} = require('../../helpers/exception.helper');
 const {isLocationValid, isIdValid} = require('../../helpers/validation.helper');
-const {uploadFiles, deleteFiles, Path, extractKeys} = require('../../helpers/s3-bucket.helper');
+const {uploadFiles, deleteFiles, Path} = require('../../helpers/s3-bucket.helper');
 
 const STATUS = Object.freeze({
     RED: 'red',
