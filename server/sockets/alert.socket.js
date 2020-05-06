@@ -31,7 +31,7 @@ class AlertWebSocketFacade {
                 const start = {latitude: alert.latitude, longitude: alert.longitude};
                 const end = {latitude: client[_latitude], longitude: client[_longitude]};
                 // Distance between user and alert is less than or equal 500 metres
-                if (haversine(start, end) <= 500) {
+                if (haversine(start, end, {unit: 'meter'}) <= 500) {
                     client.send(JSON.stringify(alert));
                 }
             }
