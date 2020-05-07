@@ -2,10 +2,14 @@ const bcrypt = require('bcrypt');
 
 const userQuery = require('../../data/queries/user.query');
 const securityConfig = require('../../config/security.config');
-const {isEmailValid} = require('../../helpers/validation.helper');
 const {badRequest} = require('../../helpers/types/custom-error.type');
+const {isEmailValid, isIdValid} = require('../../helpers/validation.helper');
+const {throwInCase} = require('../../helpers/exception.helper');
 
-const getById = id => userQuery.getById(id);
+const findById = id => {
+    throwInCase(!isIdValid(id), badRequest());
+    return userQuery.findByUserId(id);
+}
 
 const createUser = async ({email, password, fullName}) => {
     const [byEmail] = await userQuery.findByEmail(email);
@@ -21,7 +25,7 @@ const enableUser = async (userId) => await userQuery.enableUser(userId);
 const findByEmail = email => isEmailValid(email) ? userQuery.findByEmail(email) : [];
 
 module.exports = {
-    getById,
+    findById,
     createUser,
     enableUser,
     findByEmail,

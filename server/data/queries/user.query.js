@@ -1,14 +1,6 @@
 const knex = require('../db/connection');
 const {userMapper} = require('../../helpers/query.helper');
 
-// TODO: fix method naming: get... -> find...
-const getById = id => {
-    return knex('users')
-        .select('*')
-        .where('user_id', id)
-        .then(userMapper);
-};
-
 const findByEmail = email => {
     return knex('users')
         .select('*')
@@ -28,17 +20,6 @@ const create = user => {
         .then(userMapper);
 };
 
-// TODO: fix ...rest
-const update = ({userId, ...rest}) => {
-    return knex('users')
-        .where({
-            'user_id': userId
-        })
-        .update({...rest})
-        .returning('*')
-        .then(userMapper);
-};
-
 const enableUser = async userId => {
     await knex('users')
         .where({user_id: userId})
@@ -53,10 +34,8 @@ const findByUserId = userId => {
 };
 
 module.exports = {
-    getById,
     create,
     findByEmail,
-    update,
     enableUser,
     findByUserId,
 };

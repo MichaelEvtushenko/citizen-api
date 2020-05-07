@@ -5,21 +5,10 @@ const protectedRoute = require('../middlewares/protected.middleware');
 
 const router = new Router({prefix: '/users'});
 
-router.get('/http', protectedRoute(), async ctx => {
-    ctx.body = 'ok';
-});
-
-router.get('/admin', protectedRoute(['admin']), async ctx => {
-    ctx.body = 'Hello, admin!';
-});
-
-router.get('/:userId', async ctx => {
-    const userId = +ctx.params.userId;
-    ctx.assert(userId, 400, 'User id must be a number');
-
-    const [userFromDb] = await userService.getById(userId);
-    ctx.assert(userFromDb, 404, 'User not found');
-
+router.get('/:userId', protectedRoute(), async ctx => {
+    const [userFromDb] = await userService.findById(ctx.params.userId);
+    ctx.assert(userFromDb, 404, 'Not Found');
+    ctx.status = 200;
     ctx.body = userFromDb;
 });
 
