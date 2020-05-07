@@ -6,7 +6,7 @@ exports.up = knex =>
         tableBuilder.string('full_name').notNullable();
         tableBuilder.timestamp('created_at').defaultTo(knex.fn.now());
         tableBuilder.boolean('enabled').defaultTo(false);
-        tableBuilder.enu('role', ['user', 'moderator', 'admin'],
+        tableBuilder.enu('role', ['user', 'moderator', 'admin', 'super-admin'],
             {useNative: true, enumName: 'roles'})
             .defaultTo('user');
     });

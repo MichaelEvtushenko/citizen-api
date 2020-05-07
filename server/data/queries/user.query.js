@@ -1,6 +1,7 @@
 const knex = require('../db/connection');
 const {userMapper} = require('../../helpers/query.helper');
 
+// TODO: find only enabled users
 const findByEmail = email => {
     return knex('users')
         .select('*')
@@ -8,7 +9,7 @@ const findByEmail = email => {
         .then(userMapper);
 };
 
-const create = user => {
+const insert = user => {
     return knex('users')
         .insert({
             'email': user.email,
@@ -26,16 +27,26 @@ const enableUser = async userId => {
         .update({enabled: true});
 };
 
-const findByUserId = userId => {
+const findByUserId = (userId) => {
     return knex('users')
-        .where({user_id: userId})
+        .where({
+            user_id: userId,
+            enabled: true
+        })
         .select('*')
         .then(userMapper);
 };
 
+const updateRole = async ({userId, role}) => {
+    await knex('users')
+        .where({user_id: userId})
+        .update({role});
+};
+
 module.exports = {
-    create,
+    insert,
     findByEmail,
     enableUser,
     findByUserId,
+    updateRole,
 };
