@@ -20,6 +20,11 @@ router.patch('/:userId/role', protectedRoute(['admin', 'super-admin']), async ct
     ctx.status = 204;
 });
 
+router.patch('/:userId/enabled', protectedRoute(['moderator', 'admin', 'super-admin']), async ctx => {
+    await userService.updateEnabledStatus({...ctx.params, ...ctx.request.body});
+    ctx.status = 204;
+});
+
 // TODO: implement
 router.patch('/password', protectedRoute(), _ => {
     throw new CustomError('Not Implemented', 501);

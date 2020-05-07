@@ -21,10 +21,10 @@ const insert = user => {
         .then(userMapper);
 };
 
-const enableUser = async userId => {
+const enableUser = async ({userId, enabled}) => {
     await knex('users')
         .where({user_id: userId})
-        .update({enabled: true});
+        .update({enabled});
 };
 
 const findByUserId = (userId) => {
