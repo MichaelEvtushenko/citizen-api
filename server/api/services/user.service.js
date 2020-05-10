@@ -30,16 +30,10 @@ const createUser = async ({email, password, fullName}) => {
     return userQuery.insert({email, hash, fullName});
 };
 
-// TODO: delete method, use updateEnabledStatus({userId, enabled}) instead of it
-const enableUser = async (userId) => {
-    throwInCase(!isIdValid(userId), badRequest('Id is not valid'));
-    await userQuery.enableUser({userId, enabled: true});
-}
-
 const updateEnabledStatus = async ({userId, enabled}) => {
     throwInCase(!isIdValid(userId), badRequest('Id is not valid'));
     throwInCase(typeof enabled !== 'boolean', badRequest('Enabled status is not valid'));
-    await userQuery.enableUser({userId, enabled});
+    await userQuery.updateEnabledStatus({userId, enabled});
 };
 
 const findByEmail = email => {
@@ -68,7 +62,6 @@ const updateRole = async ({userId, adminId, newRole}) => {
 module.exports = {
     findDetailsById,
     createUser,
-    enableUser,
     findByEmail,
     updateRole,
     updateEnabledStatus

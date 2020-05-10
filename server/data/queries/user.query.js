@@ -21,7 +21,7 @@ const insert = user => {
         .then(userMapper);
 };
 
-const enableUser = async ({userId, enabled}) => {
+const updateEnabledStatus = async ({userId, enabled}) => {
     await knex('users')
         .where({user_id: userId})
         .update({enabled});
@@ -46,7 +46,7 @@ const updateRole = async ({userId, role}) => {
 module.exports = {
     insert,
     findByEmail,
-    enableUser,
     findByUserId,
     updateRole,
+    updateEnabledStatus,
 };

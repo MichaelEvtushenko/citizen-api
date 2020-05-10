@@ -20,7 +20,7 @@ const register = async ({email, password, fullName}) => {
 
 const activateAccount = async linkId => {
     const [{userId}] = await authLinkService.activateLink(linkId);
-    await userService.enableUser(userId);
+    await userService.updateEnabledStatus({userId, enabled: true});
 };
 
 const authenticate = async ({email, password, userAgent}) => {
