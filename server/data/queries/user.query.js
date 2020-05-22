@@ -43,10 +43,17 @@ const updateRole = async ({userId, role}) => {
         .update({role});
 };
 
+const updateFullname = async ({userId, fullName}) => {
+    await knex('users')
+        .where({user_id: userId})
+        .update({full_name: fullName});
+};
+
 module.exports = {
     insert,
     findByEmail,
     findByUserId,
     updateRole,
     updateEnabledStatus,
+    updateFullname,
 };

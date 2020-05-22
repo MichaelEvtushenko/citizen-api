@@ -25,13 +25,13 @@ router.patch('/:userId/enabled', protectedRoute(['moderator', 'admin', 'super-ad
     ctx.status = 204;
 });
 
-// TODO: implement
-router.patch('/password', protectedRoute(), _ => {
-    throw new CustomError('Not Implemented', 501);
+router.patch('/fullname', protectedRoute(), async ctx => {
+    await userService.updateFullname({...ctx.state, ...ctx.request.body})
+    ctx.status = 204;
 });
 
 // TODO: implement
-router.patch('/fullname', protectedRoute(), _ => {
+router.patch('/password', protectedRoute(), _ => {
     throw new CustomError('Not Implemented', 501);
 });
 

@@ -5,7 +5,7 @@ const approvalQuery = require('../../data/queries/approval.query');
 const alertQuery = require('../../data/queries/alert.query');
 const securityConfig = require('../../config/security.config');
 const {badRequest, notFound, forbidden} = require('../../helpers/types/custom-error.type');
-const {isEmailValid, isIdValid, isRoleValid} = require('../../helpers/validation.helper');
+const {isEmailValid, isIdValid, isRoleValid, isStringValid} = require('../../helpers/validation.helper');
 const {throwInCase} = require('../../helpers/exception.helper');
 
 const findDetailsById = async userId => {
@@ -13,13 +13,10 @@ const findDetailsById = async userId => {
     const [user] = await userQuery.findByUserId(userId);
     throwInCase(!user, notFound('User not found'));
 
-    delete user.password;
-    delete user.enabled;
-
     const [{approvalsCount}] = await approvalQuery.countByUserId(userId);
     const [{alertsCount}] = await alertQuery.countByUserId(userId);
 
-    return {...user, approvalsCount, alertsCount};
+    return {...user, approvalsCount, alertsCount, password: undefined, enabled: undefined};
 };
 
 const createUser = async ({email, password, fullName}) => {
@@ -59,10 +56,16 @@ const updateRole = async ({userId, adminId, newRole}) => {
     throw forbidden('Cannot update role');
 };
 
+const updateFullname = async ({userId, fullName}) => {
+    throwInCase(!isStringValid(fullName), badRequest('Fullname is not valid'));
+    await userQuery.updateFullname({userId, fullName: fullName.trim()});
+};
+
 module.exports = {
     findDetailsById,
     createUser,
     findByEmail,
     updateRole,
-    updateEnabledStatus
+    updateEnabledStatus,
+    updateFullname,
 };

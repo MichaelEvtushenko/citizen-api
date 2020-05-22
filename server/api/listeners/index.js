@@ -1,4 +1,4 @@
-const errorListener = require('./error.listener');
+const errorListener = require('./error-logger.listener');
 const approvalListener = require('./approval.listener');
 const alertListener = require('./alert.listener');
 
