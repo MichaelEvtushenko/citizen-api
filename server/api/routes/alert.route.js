@@ -60,7 +60,7 @@ router.get('/:alertId/comments', protectedRoute(), async ctx => {
     ctx.body = {comments: await comments, ...rest};
 });
 
-router.delete('/:alertId', protectedRoute(['moderator', 'admin']), async ctx => {
+router.delete('/:alertId', protectedRoute(['moderator', 'admin', 'super-admin']), async ctx => {
     const {alertId} = ctx.params;
     await alertService.deleteAlert(alertId);
     ctx.status = 204;

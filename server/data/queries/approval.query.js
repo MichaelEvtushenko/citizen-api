@@ -21,6 +21,12 @@ const findByAlertIdAndUserId = ({userId, alertId}) => {
         .then(approvalMapper);
 };
 
+const countByUserId = (userId) => {
+    return knex('approvals')
+        .where({user_id: userId})
+        .count('* as approvalsCount');
+};
+
 const getStatistics = (alertId) => {
     return knex.raw(
             `
@@ -34,4 +40,5 @@ module.exports = {
     insert,
     findByAlertIdAndUserId,
     getStatistics,
+    countByUserId,
 };

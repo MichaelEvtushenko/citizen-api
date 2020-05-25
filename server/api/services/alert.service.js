@@ -7,7 +7,7 @@ const {isLocationValid, isIdValid} = require('../../helpers/validation.helper');
 const {uploadFiles, deleteFiles, Path} = require('../../helpers/s3-bucket.helper');
 const {notFound, badRequest} = require('../../helpers/types/custom-error.type');
 
-const STATUS = Object.freeze({
+const Status = Object.freeze({
     RED: 'red',
     YELLOW: 'yellow',
     GREY: 'grey'
@@ -71,12 +71,12 @@ const updateAlertStatus = async (alertId) => {
     const [{status}] = await alertQuery.findByAlertId(alertId);
     let updatedStatus;
 
-    if (ratio >= 75 && status !== STATUS.RED)
-        updatedStatus = STATUS.RED;
-    else if (ratio >= 50 && status !== STATUS.YELLOW)
-        updatedStatus = STATUS.YELLOW;
-    else if (status !== STATUS.GREY)
-        updatedStatus = STATUS.GREY;
+    if (ratio >= 75 && status !== Status.RED)
+        updatedStatus = Status.RED;
+    else if (ratio >= 50 && status !== Status.YELLOW)
+        updatedStatus = Status.YELLOW;
+    else if (status !== Status.GREY)
+        updatedStatus = Status.GREY;
 
     if (updatedStatus) {
         await alertQuery.updateStatus({alertId, status: updatedStatus});

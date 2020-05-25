@@ -51,6 +51,12 @@ const deleteByAlertId = (alertId) => {
         .del();
 };
 
+const countByUserId = (userId) => {
+    return knex('alerts')
+        .where({user_id: userId})
+        .count('* as alertsCount');
+};
+
 module.exports = {
     insert,
     findInRadius,
@@ -58,4 +64,5 @@ module.exports = {
     updatePhotoUrls,
     updateStatus,
     deleteByAlertId,
+    countByUserId,
 };

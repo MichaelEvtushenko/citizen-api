@@ -1,14 +1,7 @@
 const knex = require('../db/connection');
 const {userMapper} = require('../../helpers/query.helper');
 
-// TODO: fix method naming: get... -> find...
-const getById = id => {
-    return knex('users')
-        .select('*')
-        .where('user_id', id)
-        .then(userMapper);
-};
-
+// TODO: find only enabled users
 const findByEmail = email => {
     return knex('users')
         .select('*')
@@ -16,7 +9,7 @@ const findByEmail = email => {
         .then(userMapper);
 };
 
-const create = user => {
+const insert = user => {
     return knex('users')
         .insert({
             'email': user.email,
@@ -28,35 +21,39 @@ const create = user => {
         .then(userMapper);
 };
 
-// TODO: fix ...rest
-const update = ({userId, ...rest}) => {
-    return knex('users')
-        .where({
-            'user_id': userId
-        })
-        .update({...rest})
-        .returning('*')
-        .then(userMapper);
-};
-
-const enableUser = async userId => {
+const updateEnabledStatus = async ({userId, enabled}) => {
     await knex('users')
         .where({user_id: userId})
-        .update({enabled: true});
+        .update({enabled});
 };
 
-const findByUserId = userId => {
+const findByUserId = (userId) => {
     return knex('users')
-        .where({user_id: userId})
+        .where({
+            user_id: userId,
+            enabled: true
+        })
         .select('*')
         .then(userMapper);
 };
 
+const updateRole = async ({userId, role}) => {
+    await knex('users')
+        .where({user_id: userId})
+        .update({role});
+};
+
+const updateFullname = async ({userId, fullName}) => {
+    await knex('users')
+        .where({user_id: userId})
+        .update({full_name: fullName});
+};
+
 module.exports = {
-    getById,
-    create,
+    insert,
     findByEmail,
-    update,
-    enableUser,
     findByUserId,
+    updateRole,
+    updateEnabledStatus,
+    updateFullname,
 };

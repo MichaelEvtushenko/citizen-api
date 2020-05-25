@@ -1,28 +1,71 @@
 const bcrypt = require('bcrypt');
 
 const userQuery = require('../../data/queries/user.query');
+const approvalQuery = require('../../data/queries/approval.query');
+const alertQuery = require('../../data/queries/alert.query');
 const securityConfig = require('../../config/security.config');
-const {isEmailValid} = require('../../helpers/validation.helper');
-const {badRequest} = require('../../helpers/types/custom-error.type');
+const {badRequest, notFound, forbidden} = require('../../helpers/types/custom-error.type');
+const {isEmailValid, isIdValid, isRoleValid, isStringValid} = require('../../helpers/validation.helper');
+const {throwInCase} = require('../../helpers/exception.helper');
 
-const getById = id => userQuery.getById(id);
+const findDetailsById = async userId => {
+    throwInCase(!isIdValid(userId), badRequest('Id is not valid'));
+    const [user] = await userQuery.findByUserId(userId);
+    throwInCase(!user, notFound('User not found'));
+
+    const [{approvalsCount}] = await approvalQuery.countByUserId(userId);
+    const [{alertsCount}] = await alertQuery.countByUserId(userId);
+
+    return {...user, approvalsCount, alertsCount, password: undefined, enabled: undefined};
+};
 
 const createUser = async ({email, password, fullName}) => {
     const [byEmail] = await userQuery.findByEmail(email);
-    if (byEmail) {
-        throw badRequest('Email is taken');
-    }
+    throwInCase(byEmail, badRequest('Email is taken'));
+
     const hash = await bcrypt.hash(password, securityConfig.saltRounds);
-    return userQuery.create({email, hash, fullName});
+    return userQuery.insert({email, hash, fullName});
 };
 
-const enableUser = async (userId) => await userQuery.enableUser(userId);
+const updateEnabledStatus = async ({userId, enabled}) => {
+    throwInCase(!isIdValid(userId), badRequest('Id is not valid'));
+    throwInCase(typeof enabled !== 'boolean', badRequest('Enabled status is not valid'));
+    await userQuery.updateEnabledStatus({userId, enabled});
+};
 
-const findByEmail = email => isEmailValid(email) ? userQuery.findByEmail(email) : [];
+const findByEmail = email => {
+    throwInCase(!isEmailValid(email), badRequest('Email is not valid'));
+    return userQuery.findByEmail(email);
+};
+
+const updateRole = async ({userId, adminId, newRole}) => {
+    throwInCase(!isIdValid(userId), badRequest('Id is not valid'));
+    throwInCase(!isRoleValid(newRole), badRequest('Role is not valid'));
+
+    const [user] = await userQuery.findByUserId(userId);
+    throwInCase(!user, notFound());
+
+    const {role: userRole} = user;
+    const [{role: adminRole}] = await userQuery.findByUserId(adminId);
+    const roles = ['user', 'moderator', 'admin', 'super-admin'];
+
+    if (roles.indexOf(adminRole) > roles.indexOf(userRole) &&
+        roles.indexOf(adminRole) > roles.indexOf(newRole)) {
+        return userQuery.updateRole({userId, role: newRole});
+    }
+    throw forbidden('Cannot update role');
+};
+
+const updateFullname = async ({userId, fullName}) => {
+    throwInCase(!isStringValid(fullName), badRequest('Fullname is not valid'));
+    await userQuery.updateFullname({userId, fullName: fullName.trim()});
+};
 
 module.exports = {
-    getById,
+    findDetailsById,
     createUser,
-    enableUser,
     findByEmail,
+    updateRole,
+    updateEnabledStatus,
+    updateFullname,
 };

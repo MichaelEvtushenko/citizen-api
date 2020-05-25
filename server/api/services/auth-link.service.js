@@ -4,7 +4,7 @@ const authLinkQuery = require('../../data/queries/auth-link.query');
 const {isUuidValid} = require('../../helpers/validation.helper');
 const {throwInCase} = require('../../helpers/exception.helper');
 const securityConfig = require('../../config/security.config');
-const {notFound, badRequest, unauthorized} = require('../../helpers/types/custom-error.type');
+const {notFound, badRequest} = require('../../helpers/types/custom-error.type');
 
 const createAuthLink = ({userId}) => {
     const exp = Date.now() + securityConfig.authLinkExpiresIn;
