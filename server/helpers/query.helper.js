@@ -1,3 +1,4 @@
+// TODO: refactor (http://knexjs.org/#Installation-post-process-response)
 // map result set, iterating by each row
 const resultSetMapper = rowMapper => res => res.length ? res.map(rowMapper || (v => v)) : res;
 
