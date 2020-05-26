@@ -51,13 +51,13 @@ const uploadPhotos = async ({files, alertId}) => {
 };
 
 const findByAlertId = async (alertId) => {
-    throwInCase(!isIdValid(alertId), badRequest());
+    throwInCase(!isIdValid(alertId), badRequest('Id is not valid'));
     return alertQuery.findByAlertId(alertId);
 };
 
 const findDetailAlert = async (alertId) => {
     const [alertFromDb] = await findByAlertId(alertId);
-    throwInCase(!alertFromDb, notFound());
+    throwInCase(!alertFromDb, notFound('Alert not found'));
 
     const {rows: [{allCount, approvesCount}]} = await approvalQuery.getStatistics(alertId);
     return {...alertFromDb, approvalCount: allCount, approvesCount};
