@@ -18,3 +18,5 @@ const server = app.listen(process.env.PORT, () => {
 });
 
 setupSockets(server);
+
+module.exports = server;
