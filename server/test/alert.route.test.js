@@ -80,19 +80,6 @@ describe('Alerts', () => {
                 });
         });
 
-        it('it should find path params, returning ' +
-            'status: 400 Bad Request, ' +
-            `body: { error: true, message: "Id not valid"}`, done => {
-            chai.request(server)
-                .get('/api/alerts/@_@')
-                .end((err, res) => {
-                    res.should.have.status(400);
-                    res.body.should.have.property('error').equal(true);
-                    res.body.should.have.property('message').equal('Id is not valid');
-                    done();
-                });
-        });
-
         it('it should find alerts in radius, returning ' +
             'status: 200 OK, ' +
             `body: { alerts: [], radius: 500, unit: "m", limit: 2 }`, done => {
