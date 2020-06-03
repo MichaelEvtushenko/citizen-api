@@ -16,6 +16,7 @@ jobs:
         - DB_HOST=localhost
       before_script:
         - psql -c 'CREATE DATABASE "citizen-test";' -U postgres
+        - npm run migrate && npm run seed
       script:
         - npm test
       after_script:
