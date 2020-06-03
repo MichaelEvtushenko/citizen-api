@@ -1,0 +1,30 @@
+version: '3.2'
+
+services:
+  database:
+    image:
+      postgres
+    ports:
+      - ${DB_PORT}:5432
+    container_name:
+      pg_database
+    env_file:
+      .env
+    volumes:
+      - data:/var/lib/postgresql/data
+  server:
+    build: .
+    ports:
+      - ${PORT}:3000
+    environment:
+      DB_HOST: pg_database
+    env_file:
+      .env
+    container_name:
+      node_server
+    depends_on:
+      - database
+
+volumes:
+  data:
+    external: true

@@ -2,25 +2,37 @@ const Router = require('koa-router');
 
 const userService = require('../services/user.service');
 const protectedRoute = require('../middlewares/protected.middleware');
+const CustomError = require('../../helpers/types/custom-error.type');
 
 const router = new Router({prefix: '/users'});
 
-router.get('/http', protectedRoute(), async ctx => {
-    ctx.body = 'ok';
+router.get('/:userId', protectedRoute(), async ctx => {
+    ctx.status = 200;
+    ctx.body = await userService.findDetailsById(ctx.params.userId);
 });
 
-router.get('/admin', protectedRoute(['admin']), async ctx => {
-    ctx.body = 'Hello, admin!';
+router.patch('/:userId/role', protectedRoute(['admin', 'super-admin']), async ctx => {
+    await userService.updateRole({
+        userId: ctx.params.userId,
+        newRole: ctx.request.body.role,
+        adminId: ctx.state.userId
+    });
+    ctx.status = 204;
 });
 
-router.get('/:userId', async ctx => {
-    const userId = +ctx.params.userId;
-    ctx.assert(userId, 400, 'User id must be a number');
+router.patch('/:userId/enabled', protectedRoute(['moderator', 'admin', 'super-admin']), async ctx => {
+    await userService.updateEnabledStatus({...ctx.params, ...ctx.request.body});
+    ctx.status = 204;
+});
 
-    const [userFromDb] = await userService.getById(userId);
-    ctx.assert(userFromDb, 404, 'User not found');
+router.patch('/fullname', protectedRoute(), async ctx => {
+    await userService.updateFullname({...ctx.state, ...ctx.request.body})
+    ctx.status = 204;
+});
 
-    ctx.body = userFromDb;
+// TODO: implement
+router.patch('/password', protectedRoute(), _ => {
+    throw new CustomError('Not Implemented', 501);
 });
 
 module.exports = router;

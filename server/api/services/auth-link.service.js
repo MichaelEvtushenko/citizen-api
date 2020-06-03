@@ -4,7 +4,7 @@ const authLinkQuery = require('../../data/queries/auth-link.query');
 const {isUuidValid} = require('../../helpers/validation.helper');
 const {throwInCase} = require('../../helpers/exception.helper');
 const securityConfig = require('../../config/security.config');
-
+const {notFound, badRequest} = require('../../helpers/types/custom-error.type');
 
 const createAuthLink = ({userId}) => {
     const exp = Date.now() + securityConfig.authLinkExpiresIn;
@@ -13,13 +13,13 @@ const createAuthLink = ({userId}) => {
 
 // TODO: make it transactional
 const activateLink = async linkId => {
-    throwInCase(!isUuidValid(linkId), {message: 'Bad Request', status: 400});
+    throwInCase(!isUuidValid(linkId), badRequest());
     const [link] = await authLinkQuery.findByLinkId(linkId);
-    throwInCase(!link, {message: 'Link does not exist', status: 400});
+    throwInCase(!link, notFound());
 
     const {used, exp} = link;
-    throwInCase(exp < Date.now(), {message: 'Link is expired', status: 400});
-    throwInCase(used, {message: 'Link already activated', status: 400});
+    throwInCase(exp < Date.now(), badRequest('Link expired'));
+    throwInCase(used, badRequest('Link is activated'));
 
     return authLinkQuery.activateLink(linkId);
 };

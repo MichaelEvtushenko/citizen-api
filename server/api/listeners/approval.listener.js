@@ -1,4 +1,4 @@
-const {updateAlertStatus} = require('../services/alert.service');
+ const {updateAlertStatus} = require('../services/alert.service');
 
 module.exports = app => {
     app.on('approvalCreated', ({alertId}) => {

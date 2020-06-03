@@ -5,8 +5,9 @@ const {convertToMetres} = require('../../helpers/unit.helper');
 const {throwInCase, trowInCaseLambda} = require('../../helpers/exception.helper');
 const {isLocationValid, isIdValid} = require('../../helpers/validation.helper');
 const {uploadFiles, deleteFiles, Path} = require('../../helpers/s3-bucket.helper');
+const {notFound, badRequest} = require('../../helpers/types/custom-error.type');
 
-const STATUS = Object.freeze({
+const Status = Object.freeze({
     RED: 'red',
     YELLOW: 'yellow',
     GREY: 'grey'
@@ -19,7 +20,7 @@ const createAlert = ({userId, description, latitude, longitude}) => {
 
 const approveAlert = async ({userId, alertId, approved}) => {
     const [alertFromDb] = await alertQuery.findByAlertId(alertId);
-    throwInCase(!alertFromDb, {message: 'Not found', status: 404});
+    throwInCase(!alertFromDb, notFound());
 
     const [approvalFromDb] = await approvalQuery.findByAlertIdAndUserId({userId, alertId});
     trowInCaseLambda(approvalFromDb, () => ({
@@ -31,19 +32,17 @@ const approveAlert = async ({userId, alertId, approved}) => {
     return approvalQuery.insert({userId, alertId, approved});
 };
 
-const findAlertsInRadius = ({latitude, longitude, radius = 500, unit = 'm', limit = 10}) => {
-    if (!isLocationValid({latitude, longitude}))
-        throw {message: 'Longitude or latitude is not valid', status: 400};
+const findAlertsInRadius = ({latitude, longitude, radius = 500, unit = 'm', limit = 15}) => {
+    throwInCase(!isLocationValid({latitude, longitude}), badRequest('Location is not valid'));
 
     const alerts = alertQuery.findInRadius({radius: convertToMetres(unit, radius), longitude, latitude, limit});
     return {alerts, radius, unit, limit};
 };
 
 const uploadPhotos = async ({files, alertId}) => {
-    const ex = {message: 'Not Found', status: 404};
-    throwInCase(alertId <= 0, ex);
+    throwInCase(!isIdValid(alertId), badRequest());
     const [fromDb] = await findByAlertId(alertId);
-    throwInCase(!fromDb, ex);
+    throwInCase(!fromDb, notFound());
 
     const links = (await Promise.all(uploadFiles({files, path: Path.ALERTS_PHOTOS})))
         .map(res => res.Location);
@@ -52,13 +51,13 @@ const uploadPhotos = async ({files, alertId}) => {
 };
 
 const findByAlertId = async (alertId) => {
-    throwInCase(!isIdValid(alertId), {message: `Not Found`, status: 404});
+    throwInCase(!isIdValid(alertId), badRequest('Id is not valid'));
     return alertQuery.findByAlertId(alertId);
 };
 
 const findDetailAlert = async (alertId) => {
     const [alertFromDb] = await findByAlertId(alertId);
-    throwInCase(!alertFromDb, {message: `Not Found`, status: 404});
+    throwInCase(!alertFromDb, notFound('Alert not found'));
 
     const {rows: [{allCount, approvesCount}]} = await approvalQuery.getStatistics(alertId);
     return {...alertFromDb, approvalCount: allCount, approvesCount};
@@ -72,12 +71,12 @@ const updateAlertStatus = async (alertId) => {
     const [{status}] = await alertQuery.findByAlertId(alertId);
     let updatedStatus;
 
-    if (ratio >= 75 && status !== STATUS.RED)
-        updatedStatus = STATUS.RED;
-    else if (ratio >= 50 && status !== STATUS.YELLOW)
-        updatedStatus = STATUS.YELLOW;
-    else if (status !== STATUS.GREY)
-        updatedStatus = STATUS.GREY;
+    if (ratio >= 75 && status !== Status.RED)
+        updatedStatus = Status.RED;
+    else if (ratio >= 50 && status !== Status.YELLOW)
+        updatedStatus = Status.YELLOW;
+    else if (status !== Status.GREY)
+        updatedStatus = Status.GREY;
 
     if (updatedStatus) {
         await alertQuery.updateStatus({alertId, status: updatedStatus});
@@ -86,11 +85,9 @@ const updateAlertStatus = async (alertId) => {
 };
 
 const deleteAlert = async (alertId) => {
-    const ex = {message: 'Not Found', status: 404};
-    throwInCase(!isIdValid(alertId), ex);
+    throwInCase(!isIdValid(alertId), badRequest());
     const [alertFromDb] = await findByAlertId(alertId);
-    console.log(alertFromDb);
-    throwInCase(!alertFromDb, ex);
+    throwInCase(!alertFromDb, notFound());
 
     const {photoUrls: urls} = alertFromDb;
     if (urls) {
@@ -102,7 +99,7 @@ const deleteAlert = async (alertId) => {
 const createComment = ({alertId, userId, description}) => commentQuery.insert({alertId, userId, description});
 
 const findComments = ({alertId, limit = 10, offset = 0}) => {
-    throwInCase(!isIdValid(alertId), {message: 'Not Found', status: 404});
+    throwInCase(!isIdValid(alertId), badRequest());
     const comments = commentQuery.find({alertId, limit, offset});
     return {comments, limit, offset};
 };

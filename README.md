@@ -23,7 +23,7 @@ _Idea came from Citizen app: https://en.wikipedia.org/wiki/Citizen_(app) that do
 * AWS
 ### Data flow
 
-![data-flow-pic](./readme_static/data-flow.png)
+![data-flow-pic](readme-static/data-flow.png)
 
 **How user can report safety alert?**
 * User will post new alerts in radius, where incedent happened, providing text and photos (or video stream in advanced plans)

@@ -5,10 +5,11 @@ const userService = require('./user.service');
 const authLinkService = require('./auth-link.service');
 const jwtHelper = require('../../helpers/jwt.helper');
 const emailHelper = require('../../helpers/email.helper');
-const {isUuidValid} = require('../../helpers/validation.helper');
+const {isUuidValid, isIdValid} = require('../../helpers/validation.helper');
 const {throwInCase} = require('../../helpers/exception.helper');
 const jwtConfig = require('../../config/jwt.config');
 const sessionQuery = require('../../data/queries/session.query');
+const {notFound, badRequest, unauthorized} = require('../../helpers/types/custom-error.type');
 
 // TODO: make it transactional
 const register = async ({email, password, fullName}) => {
@@ -19,18 +20,18 @@ const register = async ({email, password, fullName}) => {
 
 const activateAccount = async linkId => {
     const [{userId}] = await authLinkService.activateLink(linkId);
-    await userService.enableUser(userId);
+    await userService.updateEnabledStatus({userId, enabled: true});
 };
 
 const authenticate = async ({email, password, userAgent}) => {
     const [fromDb] = await userService.findByEmail(email);
-    throwInCase(!fromDb, {status: 401, message: 'Email is wrong'});
+    throwInCase(!fromDb, unauthorized('Email is wrong'));
 
     const {password: hash, userId, role, enabled} = fromDb;
-    throwInCase(!enabled, {message: 'Unactivated account', status: 401});
+    throwInCase(!enabled, unauthorized('Unactivated account'));
 
     if (!await bcrypt.compare(password, hash)) {
-        throw {status: 401, message: 'Password is wrong'};
+        throw unauthorized('Password is wrong');
     }
 
     const [{count}] = await sessionQuery.countByUserId(userId);
@@ -47,16 +48,13 @@ const authenticate = async ({email, password, userAgent}) => {
 };
 
 const logout = async refreshToken => {
-    throwInCase(!isUuidValid(refreshToken), {message: 'Refresh token is not valid', status: 400});
+    throwInCase(!isUuidValid(refreshToken), badRequest('Refresh token is not valid'));
     await sessionQuery.deleteByRefreshToken(refreshToken);
 };
 
 const logoutAll = async userId => {
-    if (+userId) {
-        await sessionQuery.deleteByUserId(userId)
-    } else {
-        throw {message: 'Bad Request', status: 400};
-    }
+    throwInCase(!isIdValid(userId), badRequest());
+    await sessionQuery.deleteByUserId(userId)
 }
 
 const createRefreshToken = async ({userId, userAgent}) => {
@@ -67,20 +65,20 @@ const createRefreshToken = async ({userId, userAgent}) => {
 };
 
 const refreshToken = async ({refreshToken, userAgent}) => {
-    throwInCase(!isUuidValid(refreshToken), {message: 'Refresh token is not valid', status: 400});
+    throwInCase(!isUuidValid(refreshToken), badRequest('Refresh token is not valid'));
     const [fromDb] = await sessionQuery.joinUserByRefreshToken(refreshToken);
-    throwInCase(!fromDb, {message: 'Refresh token does not exist', status: 404});
+    throwInCase(!fromDb, notFound('Refresh token does not exist'));
 
     const {userId, expiredAt, role} = fromDb;
     if (expiredAt < Date.now()) {
-        throw {message: 'Refresh token expired', status: 401};
+        throw unauthorized('Refresh token expired');
     }
 
     if (fromDb.userAgent !== userAgent) {
         // Attempt to hack
         console.warn('Attempt to authorize from unknown user-agent:', userAgent);
         console.warn('User-agent from DB:', fromDb.userAgent);
-        throw {message: 'Unauthorized', status: 401};
+        throw unauthorized();
     }
 
     const newRefreshToken = uuid.v4();
