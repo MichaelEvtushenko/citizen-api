@@ -1,0 +1,22 @@
+language:
+  node_js
+node_js:
+  - 11.13.0
+services:
+  - postgresql
+jobs:
+  include:
+    - stage: unit tests
+      install:
+        - cd server && npm install
+      env:
+        - DB_NAME=citizen-test
+        - DB_USER=postgres
+        - DB_PASSWORD=root
+        - DB_HOST=localhost
+      before_script:
+        - psql -c 'CREATE DATABASE "citizen-test";' -U postgres
+      script:
+        - npm test
+      after_script:
+        - psql -c 'DROP DATABASE "citizen-test";' -U postgres

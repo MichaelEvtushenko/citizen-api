@@ -4,8 +4,9 @@
   "description": "Citizen clone app",
   "main": "server.js",
   "scripts": {
-    "test": "echo \\\"Error: no http specified\\\" && exit 1",
-    "dev": "nodemon server.js"
+    "test": "cd tests && mocha --exit --timeout 10s *",
+    "migrate": "knex migrate:latest --knexfile libs/knexfile.js",
+    "seed": "knex seed:run --knexfile libs/knexfile.js"
   },
   "repository": {
     "type": "git",
