@@ -9,13 +9,13 @@ const isPasswordValid = password => !!password && password.length >= minPassword
 
 const isUuidValid = uuid => !!(uuid && uuid.length === 36) && uuidRegexp.test(uuid);
 
-const isLongitudeValid = longitude => !!longitude && Math.abs(longitude) <= 180;
+const isLongitudeValid = longitude => !!+longitude && Math.abs(longitude) <= 180;
 
-const isLatitudeValid = latitude => !!latitude && Math.abs(latitude) <= 90;
+const isLatitudeValid = latitude => !!+latitude && Math.abs(latitude) <= 90;
 
 const isLocationValid = ({latitude, longitude}) => isLatitudeValid(latitude) && isLongitudeValid(longitude);
 
-const isStringValid = str => !!(str && str.trim());
+const isStringValid = str => !!(typeof str === 'string' && str.trim());
 
 const isIdValid = id => !!(+id && id > 0);
 
