@@ -1,30 +1,13 @@
-version: '3.2'
+FROM node:13.12.0-alpine3.10
 
-services:
-  database:
-    image:
-      postgres
-    ports:
-      - ${DB_PORT}:5432
-    container_name:
-      pg_database
-    env_file:
-      .env
-    volumes:
-      - data:/var/lib/postgresql/data
-  server:
-    build: .
-    ports:
-      - ${PORT}:3000
-    environment:
-      DB_HOST: pg_database
-    env_file:
-      .env
-    container_name:
-      node_server
-    depends_on:
-      - database
+ARG APP_DIR=app/
 
-volumes:
-  data:
-    external: true
+WORKDIR ${APP_DIR}
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+CMD ["npm", "start"]
