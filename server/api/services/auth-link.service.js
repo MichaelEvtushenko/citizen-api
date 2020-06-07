@@ -26,7 +26,7 @@ const activateLink = async linkId => {
 
 const removeExpiredLinks = async () => {
     try {
-        const links = await authLinkQuery.findExpiredLink(Date.now());
+        const links = await authLinkQuery.findExpiredLink();
         for (const id of links.map(l => l.linkId)) {
             await authLinkQuery.deleteById(id);
             console.log(`Auth link was deleted [ID: ${id}]`);
