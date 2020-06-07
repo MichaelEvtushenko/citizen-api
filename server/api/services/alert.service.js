@@ -60,7 +60,7 @@ const findDetailAlert = async (alertId) => {
     throwInCase(!alertFromDb, notFound('Alert not found'));
 
     const {rows: [{allCount, approvesCount}]} = await approvalQuery.getStatistics(alertId);
-    return {...alertFromDb, approvalCount: allCount, approvesCount};
+    return {...alertFromDb, allCount, approvesCount};
 };
 
 const updateAlertStatus = async (alertId) => {
@@ -96,7 +96,17 @@ const deleteAlert = async (alertId) => {
     return alertQuery.deleteByAlertId(alertId);
 };
 
-const createComment = ({alertId, userId, description}) => commentQuery.insert({alertId, userId, description});
+const createComment = async ({alertId, userId, description}) => {
+    const [alert] = await findByAlertId({alertId});
+    throwInCase(!alert, notFound('Alert not found'));
+
+    return commentQuery.insert({alertId, userId, description})
+};
+
+const deleteWasteAlerts = async () => {
+    const alerts = await alertQuery.findWasteAlerts();
+    await Promise.all(alerts.map(({alertId}) => deleteAlert(alertId)));
+};
 
 const findComments = ({alertId, limit = 10, offset = 0}) => {
     throwInCase(!isIdValid(alertId), badRequest());
@@ -115,4 +125,5 @@ module.exports = {
     deleteAlert,
     createComment,
     findComments,
+    deleteWasteAlerts,
 };
