@@ -31,9 +31,9 @@ const activateLink = linkId => {
         .then(authLinkMapper);
 };
 
-const findExpiredLink = date => {
+const findExpiredLink = () => {
     return knex('auth_links')
-        .where('exp', '<', date)
+        .where('exp', '<', Date.now())
         .then(authLinkMapper);
 };
 

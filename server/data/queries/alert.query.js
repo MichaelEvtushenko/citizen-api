@@ -57,6 +57,13 @@ const countByUserId = (userId) => {
         .count('* as alertsCount');
 };
 
+const findWasteAlerts = () => {
+    return knex('alerts')
+        .whereRaw('now() - reported_at >= make_interval(days => 1)')
+        .select('*')
+        .then(alertMapper);
+};
+
 module.exports = {
     insert,
     findInRadius,
@@ -65,4 +72,5 @@ module.exports = {
     updateStatus,
     deleteByAlertId,
     countByUserId,
+    findWasteAlerts,
 };

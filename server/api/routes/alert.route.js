@@ -47,9 +47,9 @@ router.get('/', async ctx => {
 
 router.get('/:alertId', async ctx => {
     const {alertId} = ctx.params;
-    const detailsAlert = await alertService.findDetailAlert(alertId);
+    const detailAlert = await alertService.findDetailAlert(alertId);
     ctx.status = 200;
-    ctx.body = detailsAlert;
+    ctx.body = detailAlert;
 });
 
 router.get('/:alertId/comments', protectedRoute(), async ctx => {

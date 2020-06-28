@@ -1,5 +1,6 @@
 const crypto = require('crypto');
-
+const {badRequest} = require('./types/custom-error.type');
+const {throwInCase} = require('./exception.helper');
 const jwtConfig = require('../config/jwt.config');
 
 const encodeToBase64 = data => Buffer.from(JSON.stringify(data)).toString('base64');
@@ -37,18 +38,16 @@ const extractClaims = token => {
 };
 
 const verifyToken = token => {
-    const badRequestError = {status: 401, message: 'Token is not valid'};
-    if (!token) {
-        throw badRequestError;
-    }
+    const ex = badRequest('Token is not valid');
+    throwInCase(!token, ex);
+
     const [encodedHeader, encodedPayload, encodedSignature] = token.split('.');
 
     const isValidToken = encodedSignature === crypto.createHmac('SHA256', jwtConfig.secretKey).update(
         `${encodedHeader}.${encodedPayload}`).digest('base64');
 
-    if (!isValidToken) {
-        throw badRequestError;
-    }
+    throwInCase(!isValidToken, ex);
+
     return extractClaims(token);
 };
 

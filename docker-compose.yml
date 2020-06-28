@@ -13,7 +13,7 @@ services:
     volumes:
       - data:/var/lib/postgresql/data
   server:
-    build: .
+    build: ./server
     ports:
       - ${PORT}:3000
     environment:
