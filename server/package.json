@@ -21,7 +21,7 @@
   "dependencies": {
     "@koa/cors": "^2.2.3",
     "@koa/multer": "^2.0.2",
-    "aws-sdk": "^2.653.0",
+    "aws-sdk": "^2.814.0",
     "bcrypt": "^5.0.0",
     "cron": "^1.8.2",
     "cryptojs": "^2.5.3",
